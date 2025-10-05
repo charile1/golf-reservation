@@ -45,7 +45,9 @@ export default function TeeTimeBookingsModal({
     customer_id: '',
     name: '',
     phone: '',
-    people_count: '1',
+    booking_type: 'JOIN' as 'TRANSFER' | 'JOIN',
+    people_count: 1,
+    companion_names: [''],
     memo: '',
   })
 
@@ -91,21 +93,71 @@ export default function TeeTimeBookingsModal({
         customer_id: '',
         name: '',
         phone: '',
-        people_count: '1',
+        booking_type: 'JOIN',
+        people_count: 1,
+        companion_names: [''],
         memo: '',
       })
     }
   }, [open])
 
+  // 예약 타입 변경 시 처리
+  const handleBookingTypeChange = (type: 'TRANSFER' | 'JOIN') => {
+    if (type === 'TRANSFER' && teeTime) {
+      // 양도인 경우 전체 인원으로 설정
+      const count = teeTime.slots_total
+      const newCompanionNames = Array(count).fill('').map((_, idx) =>
+        formData.companion_names[idx] || (idx === 0 ? formData.name : '')
+      )
+      setFormData({
+        ...formData,
+        booking_type: type,
+        people_count: count,
+        companion_names: newCompanionNames,
+      })
+    } else {
+      // 조인인 경우
+      setFormData({
+        ...formData,
+        booking_type: type,
+      })
+    }
+  }
+
+  // 인원수 변경 시 companion_names 배열 크기 조정
+  const handlePeopleCountChange = (count: number) => {
+    const newCompanionNames = Array(count).fill('').map((_, idx) =>
+      formData.companion_names[idx] || ''
+    )
+    setFormData({
+      ...formData,
+      people_count: count,
+      companion_names: newCompanionNames,
+    })
+  }
+
+  // 동반자 이름 변경
+  const handleCompanionNameChange = (index: number, value: string) => {
+    const newCompanionNames = [...formData.companion_names]
+    newCompanionNames[index] = value
+    setFormData({
+      ...formData,
+      companion_names: newCompanionNames,
+    })
+  }
+
   // Handle customer selection
   const handleCustomerChange = (customerId: string) => {
     const customer = customers?.find(c => c.id === customerId)
     if (customer) {
+      const newCompanionNames = [...formData.companion_names]
+      newCompanionNames[0] = customer.name
       setFormData({
         ...formData,
         customer_id: customerId,
         name: customer.name,
         phone: customer.phone,
+        companion_names: newCompanionNames,
       })
     }
   }
@@ -115,12 +167,20 @@ export default function TeeTimeBookingsModal({
     mutationFn: async (data: typeof formData) => {
       if (!teeTime) return
 
+      // 모든 고객명이 입력되었는지 확인
+      const hasEmptyNames = data.companion_names.some(name => !name.trim())
+      if (hasEmptyNames) {
+        throw new Error('모든 고객명을 입력해주세요.')
+      }
+
       const payload = {
         tee_time_id: teeTime.id,
         customer_id: customerMode === 'existing' ? data.customer_id || null : null,
         name: data.name,
         phone: data.phone,
-        people_count: parseInt(data.people_count),
+        booking_type: data.booking_type,
+        people_count: data.people_count,
+        companion_names: data.companion_names,
         status: 'PENDING' as const,
         memo: data.memo || null,
       }
@@ -141,7 +201,9 @@ export default function TeeTimeBookingsModal({
         customer_id: '',
         name: '',
         phone: '',
-        people_count: '1',
+        booking_type: 'JOIN',
+        people_count: 1,
+        companion_names: [''],
         memo: '',
       })
     },
@@ -226,7 +288,16 @@ export default function TeeTimeBookingsModal({
                     className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                   >
                     <div className="flex-1">
-                      <div className="font-medium">{booking.name}</div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{booking.name}</span>
+                        <span className={`text-xs px-2 py-0.5 rounded ${
+                          booking.booking_type === 'TRANSFER'
+                            ? 'bg-purple-100 text-purple-800'
+                            : 'bg-orange-100 text-orange-800'
+                        }`}>
+                          {booking.booking_type === 'TRANSFER' ? '양도' : '조인'}
+                        </span>
+                      </div>
                       <div className="text-sm text-gray-600">
                         {booking.phone} | {booking.people_count}명
                         {booking.customer && (
@@ -235,6 +306,12 @@ export default function TeeTimeBookingsModal({
                           </span>
                         )}
                       </div>
+                      {booking.companion_names && booking.companion_names.length > 0 && (
+                        <div className="text-sm text-gray-700 mt-1">
+                          <span className="font-medium">고객명:</span>{' '}
+                          {booking.companion_names.join(', ')}
+                        </div>
+                      )}
                       {booking.memo && (
                         <div className="text-xs text-gray-500 mt-1">{booking.memo}</div>
                       )}
@@ -265,6 +342,35 @@ export default function TeeTimeBookingsModal({
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-3">
+                <div>
+                  <Label>예약 타입</Label>
+                  <div className="flex gap-2 mt-1">
+                    <Button
+                      type="button"
+                      variant={formData.booking_type === 'JOIN' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => handleBookingTypeChange('JOIN')}
+                      className="flex-1"
+                    >
+                      조인
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={formData.booking_type === 'TRANSFER' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => handleBookingTypeChange('TRANSFER')}
+                      className="flex-1"
+                    >
+                      양도
+                    </Button>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {formData.booking_type === 'TRANSFER'
+                      ? '양도: 전체 인원을 대표자가 가져갑니다'
+                      : '조인: 일부 인원만 예약합니다'}
+                  </p>
+                </div>
+
                 <div>
                   <div className="flex gap-2">
                     <Button
@@ -310,11 +416,20 @@ export default function TeeTimeBookingsModal({
                 ) : (
                   <>
                     <div>
-                      <Label htmlFor="name">예약자명</Label>
+                      <Label htmlFor="name">예약자명 (대표)</Label>
                       <Input
                         id="name"
                         value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        onChange={(e) => {
+                          const newName = e.target.value
+                          const newCompanionNames = [...formData.companion_names]
+                          newCompanionNames[0] = newName
+                          setFormData({
+                            ...formData,
+                            name: newName,
+                            companion_names: newCompanionNames,
+                          })
+                        }}
                         placeholder="홍길동"
                         required
                         className="mt-1"
@@ -338,10 +453,9 @@ export default function TeeTimeBookingsModal({
                 <div>
                   <Label htmlFor="people_count">인원</Label>
                   <Select
-                    value={formData.people_count}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, people_count: value })
-                    }
+                    value={formData.people_count.toString()}
+                    onValueChange={(value) => handlePeopleCountChange(parseInt(value))}
+                    disabled={formData.booking_type === 'TRANSFER'}
                   >
                     <SelectTrigger className="mt-1">
                       <SelectValue />
@@ -353,6 +467,29 @@ export default function TeeTimeBookingsModal({
                       <SelectItem value="4">4명</SelectItem>
                     </SelectContent>
                   </Select>
+                  {formData.booking_type === 'TRANSFER' && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      양도는 전체 {teeTime?.slots_total}명으로 자동 설정됩니다
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <Label>고객명 ({formData.people_count}명)</Label>
+                  <div className="space-y-2 mt-1">
+                    {formData.companion_names.map((name, index) => (
+                      <Input
+                        key={index}
+                        value={name}
+                        onChange={(e) => handleCompanionNameChange(index, e.target.value)}
+                        placeholder={`${index + 1}번째 고객 이름`}
+                        required
+                      />
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    모든 고객명을 입력해주세요. 골프장에 전달됩니다.
+                  </p>
                 </div>
 
                 <div>
