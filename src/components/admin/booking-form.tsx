@@ -39,7 +39,8 @@ export default function BookingForm({ open, onClose, booking }: BookingFormProps
     customer_id: '',
     name: '',
     phone: '',
-    people_count: '1',
+    people_count: 1,
+    companion_names: [''],
     status: 'PENDING' as const,
     memo: '',
   })
@@ -84,7 +85,8 @@ export default function BookingForm({ open, onClose, booking }: BookingFormProps
         customer_id: booking.customer_id || '',
         name: booking.name,
         phone: booking.phone,
-        people_count: booking.people_count.toString(),
+        people_count: booking.people_count,
+        companion_names: booking.companion_names || Array(booking.people_count).fill(''),
         status: booking.status,
         memo: booking.memo || '',
       })
@@ -95,7 +97,8 @@ export default function BookingForm({ open, onClose, booking }: BookingFormProps
         customer_id: '',
         name: '',
         phone: '',
-        people_count: '1',
+        people_count: 1,
+        companion_names: [''],
         status: 'PENDING',
         memo: '',
       })
@@ -103,27 +106,59 @@ export default function BookingForm({ open, onClose, booking }: BookingFormProps
     }
   }, [booking, open])
 
+  // 인원수 변경 시 companion_names 배열 크기 조정
+  const handlePeopleCountChange = (count: number) => {
+    const newCompanionNames = Array(count).fill('').map((_, idx) =>
+      formData.companion_names[idx] || ''
+    )
+    setFormData({
+      ...formData,
+      people_count: count,
+      companion_names: newCompanionNames,
+    })
+  }
+
+  // 동반자 이름 변경
+  const handleCompanionNameChange = (index: number, value: string) => {
+    const newCompanionNames = [...formData.companion_names]
+    newCompanionNames[index] = value
+    setFormData({
+      ...formData,
+      companion_names: newCompanionNames,
+    })
+  }
+
   // Handle customer selection
   const handleCustomerChange = (customerId: string) => {
     const customer = customers?.find(c => c.id === customerId)
     if (customer) {
+      const newCompanionNames = [...formData.companion_names]
+      newCompanionNames[0] = customer.name
       setFormData({
         ...formData,
         customer_id: customerId,
         name: customer.name,
         phone: customer.phone,
+        companion_names: newCompanionNames,
       })
     }
   }
 
   const mutation = useMutation({
     mutationFn: async (data: typeof formData) => {
+      // 모든 고객명이 입력되었는지 확인
+      const hasEmptyNames = data.companion_names.some(name => !name.trim())
+      if (hasEmptyNames) {
+        throw new Error('모든 고객명을 입력해주세요.')
+      }
+
       const payload = {
         tee_time_id: data.tee_time_id,
         customer_id: customerMode === 'existing' ? data.customer_id || null : null,
         name: data.name,
         phone: data.phone,
-        people_count: parseInt(data.people_count),
+        people_count: data.people_count,
+        companion_names: data.companion_names,
         status: data.status,
         memo: data.memo || null,
         paid_at: data.status === 'CONFIRMED' ? new Date().toISOString() : null,
@@ -239,11 +274,20 @@ export default function BookingForm({ open, onClose, booking }: BookingFormProps
           ) : (
             <>
               <div>
-                <Label htmlFor="name">예약자명</Label>
+                <Label htmlFor="name">예약자명 (대표)</Label>
                 <Input
                   id="name"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => {
+                    const newName = e.target.value
+                    const newCompanionNames = [...formData.companion_names]
+                    newCompanionNames[0] = newName
+                    setFormData({
+                      ...formData,
+                      name: newName,
+                      companion_names: newCompanionNames,
+                    })
+                  }}
                   placeholder="홍길동"
                   required
                   className="mt-1"
@@ -267,10 +311,8 @@ export default function BookingForm({ open, onClose, booking }: BookingFormProps
           <div>
             <Label htmlFor="people_count">인원</Label>
             <Select
-              value={formData.people_count}
-              onValueChange={(value) =>
-                setFormData({ ...formData, people_count: value })
-              }
+              value={formData.people_count.toString()}
+              onValueChange={(value) => handlePeopleCountChange(parseInt(value))}
             >
               <SelectTrigger className="mt-1">
                 <SelectValue />
@@ -282,6 +324,24 @@ export default function BookingForm({ open, onClose, booking }: BookingFormProps
                 <SelectItem value="4">4명</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div>
+            <Label>고객명 ({formData.people_count}명)</Label>
+            <div className="space-y-2 mt-1">
+              {formData.companion_names.map((name, index) => (
+                <Input
+                  key={index}
+                  value={name}
+                  onChange={(e) => handleCompanionNameChange(index, e.target.value)}
+                  placeholder={`${index + 1}번째 고객 이름`}
+                  required
+                />
+              ))}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              모든 고객명을 입력해주세요. 골프장에 전달됩니다.
+            </p>
           </div>
 
           <div>
