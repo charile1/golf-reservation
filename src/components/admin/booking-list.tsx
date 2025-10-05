@@ -1,6 +1,6 @@
 import { Edit, Trash2, CheckCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { formatDate, formatDateTime } from '@/lib/utils'
+import { formatDate, formatDateTime, formatDateWithDay } from '@/lib/utils'
 import type { BookingWithTeeTime } from '@/types/database'
 
 interface BookingListProps {
@@ -36,10 +36,29 @@ export default function BookingList({
     )
   }
 
+  // 날짜별로 그룹화
+  const groupedByDate = bookings.reduce((groups, booking) => {
+    const date = booking.tee_time.date
+    if (!groups[date]) {
+      groups[date] = []
+    }
+    groups[date].push(booking)
+    return groups
+  }, {} as Record<string, BookingWithTeeTime[]>)
+
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
+    <div className="space-y-6">
+      {Object.entries(groupedByDate).map(([date, dateBookings]) => (
+        <div key={date} className="bg-white rounded-lg shadow overflow-hidden">
+          {/* 날짜 헤더 */}
+          <div className="bg-gray-50 px-6 py-3 border-b">
+            <h3 className="text-lg font-semibold text-gray-900">
+              {formatDateWithDay(date)}
+            </h3>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -55,6 +74,9 @@ export default function BookingList({
                 인원
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                고객명
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 상태
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -66,7 +88,7 @@ export default function BookingList({
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {bookings.map((booking) => (
+            {dateBookings.map((booking) => (
               <tr key={booking.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">
@@ -85,6 +107,13 @@ export default function BookingList({
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">
                     {booking.people_count}명
+                  </div>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="text-sm text-gray-900">
+                    {booking.companion_names && booking.companion_names.length > 0
+                      ? booking.companion_names.join(', ')
+                      : '-'}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -137,6 +166,8 @@ export default function BookingList({
           </tbody>
         </table>
       </div>
+        </div>
+      ))}
     </div>
   )
 }

@@ -41,10 +41,17 @@ export default function BookingsPage() {
           *,
           tee_time:tee_time_id (*)
         `)
-        .order('created_at', { ascending: false })
 
       if (error) throw error
-      return data as unknown as BookingWithTeeTime[]
+
+      // 티타임 날짜와 시간 기준으로 정렬
+      const sorted = (data as unknown as BookingWithTeeTime[]).sort((a, b) => {
+        const dateCompare = a.tee_time.date.localeCompare(b.tee_time.date)
+        if (dateCompare !== 0) return dateCompare
+        return a.tee_time.time.localeCompare(b.tee_time.time)
+      })
+
+      return sorted
     },
   })
 
