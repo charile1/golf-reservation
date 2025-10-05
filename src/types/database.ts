@@ -1,5 +1,6 @@
 export type TeeTimeStatus = 'AVAILABLE' | 'JOINING' | 'CONFIRMED' | 'CANCELED'
 export type BookingStatus = 'PENDING' | 'CONFIRMED' | 'CANCELED'
+export type BookingType = 'TRANSFER' | 'JOIN'
 
 export interface Customer {
   id: string
@@ -33,6 +34,7 @@ export interface Booking {
   phone: string
   people_count: number
   companion_names: string[] | null
+  booking_type: BookingType
   status: BookingStatus
   paid_at: string | null
   memo: string | null
@@ -46,4 +48,12 @@ export interface BookingWithTeeTime extends Booking {
 
 export interface BookingWithCustomer extends Booking {
   customer: Customer | null
+}
+
+export interface AdminUser {
+  id: string
+  name: string
+  email: string
+  created_at: string
+  updated_at: string
 }
