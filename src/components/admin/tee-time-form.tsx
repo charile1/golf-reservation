@@ -184,6 +184,23 @@ export default function TeeTimeForm({ open, onClose, teeTime }: TeeTimeFormProps
           </div>
 
           <div>
+            <Label htmlFor="onsite_payment">현장 결제 (원)</Label>
+            <Input
+              id="onsite_payment"
+              type="number"
+              value={formData.onsite_payment}
+              onChange={(e) =>
+                setFormData({ ...formData, onsite_payment: e.target.value })
+              }
+              placeholder="0"
+              className="mt-1"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              카트비, 캐디피 등 현장에서 결제할 금액
+            </p>
+          </div>
+
+          <div>
             <Label htmlFor="slots_total">총 인원</Label>
             <Select
               value={formData.slots_total}
