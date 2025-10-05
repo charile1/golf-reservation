@@ -82,6 +82,11 @@ export default function TeeTimeList({
                     </div>
                     <div className="text-sm text-gray-600 mt-1">
                       그린피: {formatCurrency(teeTime.green_fee)}
+                      {teeTime.onsite_payment > 0 && (
+                        <span className="ml-2 text-gray-500">
+                          | 현장결제: {formatCurrency(teeTime.onsite_payment)}
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -172,8 +177,13 @@ export default function TeeTimeList({
                       {teeTime.course_name}
                     </div>
                     <div className="text-sm text-gray-600 mt-1">
-                      {formatCurrency(teeTime.green_fee)}
+                      그린피: {formatCurrency(teeTime.green_fee)}
                     </div>
+                    {teeTime.onsite_payment > 0 && (
+                      <div className="text-sm text-gray-500 mt-0.5">
+                        현장결제: {formatCurrency(teeTime.onsite_payment)}
+                      </div>
+                    )}
                   </div>
 
                   {/* 예약현황 */}
