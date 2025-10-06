@@ -11,6 +11,7 @@ import BookingList from '@/components/admin/booking-list'
 import AdminNav from '@/components/admin/admin-nav'
 import type { BookingWithTeeTime } from '@/types/database'
 import { useRouter } from 'next/navigation'
+import { createTransaction, cancelTransaction, transactionExists } from '@/lib/transaction'
 
 export default function BookingsPage() {
   const router = useRouter()
@@ -74,12 +75,22 @@ export default function BookingsPage() {
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      // 1. transaction 취소 (CASCADE로 자동 삭제되지만 명시적으로 취소 처리)
+      try {
+        await cancelTransaction(supabase, id)
+      } catch (error) {
+        // transaction이 없으면 무시
+        console.log('No transaction to cancel')
+      }
+
+      // 2. booking 삭제
       const { error } = await supabase.from('booking').delete().eq('id', id)
       if (error) throw error
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] })
       queryClient.invalidateQueries({ queryKey: ['teeTimes'] })
+      queryClient.invalidateQueries({ queryKey: ['transactions'] })
       toast({
         title: '삭제 완료',
         description: '예약이 삭제되었습니다.',
@@ -97,6 +108,7 @@ export default function BookingsPage() {
   // Confirm payment mutation
   const confirmPaymentMutation = useMutation({
     mutationFn: async (id: string) => {
+      // 1. booking 상태 업데이트
       const { error } = await supabase
         .from('booking')
         .update({
@@ -105,13 +117,22 @@ export default function BookingsPage() {
         })
         .eq('id', id)
       if (error) throw error
+
+      // 2. transaction이 이미 존재하는지 확인
+      const exists = await transactionExists(supabase, id)
+
+      // 3. transaction이 없으면 생성
+      if (!exists) {
+        await createTransaction(supabase, id)
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] })
       queryClient.invalidateQueries({ queryKey: ['teeTimes'] })
+      queryClient.invalidateQueries({ queryKey: ['transactions'] })
       toast({
         title: '입금 확인 완료',
-        description: '예약이 확정되었습니다.',
+        description: '예약이 확정되고 거래 내역이 생성되었습니다.',
       })
     },
     onError: (error) => {
