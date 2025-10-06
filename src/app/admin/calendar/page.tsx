@@ -51,7 +51,13 @@ export default function CalendarPage() {
               <p className="text-gray-500">로딩 중...</p>
             </div>
           ) : (
-            <CalendarView teeTimes={teeTimes || []} />
+            <CalendarView
+              teeTimes={teeTimes || []}
+              onTeeTimeClick={(teeTime) => {
+                // 캘린더에서 티타임 클릭 시 티타임 관리 페이지로 이동
+                router.push('/admin/tee-times')
+              }}
+            />
           )}
         </div>
       </div>
