@@ -1,12 +1,12 @@
-'use client'
+"use client"
 
-import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/button'
-import { ClipboardList, Clock, LogOut, Users, Menu, X } from 'lucide-react'
-import { useToast } from '@/components/ui/use-toast'
-import { useState, useEffect } from 'react'
+import Link from "next/link"
+import { usePathname, useRouter } from "next/navigation"
+import { createClient } from "@/lib/supabase/client"
+import { Button } from "@/components/ui/button"
+import { ClipboardList, Clock, LogOut, Users, Menu, X } from "lucide-react"
+import { useToast } from "@/components/ui/use-toast"
+import { useState, useEffect } from "react"
 
 export default function AdminNav() {
   const pathname = usePathname()
@@ -14,24 +14,26 @@ export default function AdminNav() {
   const { toast } = useToast()
   const supabase = createClient()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [userName, setUserName] = useState<string>('')
+  const [userName, setUserName] = useState<string>("")
 
   useEffect(() => {
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
       if (user?.id) {
         // admin_user 테이블에서 이름 조회
         const { data: adminUser } = await supabase
-          .from('admin_user')
-          .select('name')
-          .eq('id', user.id)
+          .from("admin_user")
+          .select("name")
+          .eq("id", user.id)
           .single()
 
         if (adminUser?.name) {
           setUserName(adminUser.name)
         } else {
           // 없으면 이메일 사용
-          setUserName(user.email?.split('@')[0] || '')
+          setUserName(user.email?.split("@")[0] || "닉네임 없음")
         }
       }
     }
@@ -41,17 +43,17 @@ export default function AdminNav() {
   const handleLogout = async () => {
     await supabase.auth.signOut()
     toast({
-      title: '로그아웃',
-      description: '로그아웃되었습니다.',
+      title: "로그아웃",
+      description: "로그아웃되었습니다.",
     })
-    router.push('/admin/login')
+    router.push("/admin/login")
     router.refresh()
   }
 
   const navItems = [
-    { href: '/admin/tee-times', label: '티타임 관리', icon: Clock },
-    { href: '/admin/bookings', label: '예약 관리', icon: ClipboardList },
-    { href: '/admin/customers', label: '고객 관리', icon: Users },
+    { href: "/admin/tee-times", label: "티타임 관리", icon: Clock },
+    { href: "/admin/bookings", label: "예약 관리", icon: ClipboardList },
+    { href: "/admin/customers", label: "고객 관리", icon: Users },
   ]
 
   return (
@@ -59,7 +61,10 @@ export default function AdminNav() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* 로고 */}
-          <Link href="/admin/tee-times" className="text-lg sm:text-xl font-bold text-gray-900 shrink-0">
+          <Link
+            href="/admin/tee-times"
+            className="text-lg sm:text-xl font-bold text-gray-900 shrink-0"
+          >
             골프 예약
           </Link>
 
@@ -74,8 +79,8 @@ export default function AdminNav() {
                   href={item.href}
                   className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-gray-100 text-gray-900'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      ? "bg-gray-100 text-gray-900"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -99,7 +104,11 @@ export default function AdminNav() {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="lg:hidden p-2 rounded-md text-gray-600 hover:bg-gray-100"
           >
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            {mobileMenuOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
           </button>
         </div>
 
@@ -121,8 +130,8 @@ export default function AdminNav() {
                   onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-gray-100 text-gray-900'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      ? "bg-gray-100 text-gray-900"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -130,7 +139,12 @@ export default function AdminNav() {
                 </Link>
               )
             })}
-            <Button variant="ghost" onClick={handleLogout} size="sm" className="w-full justify-start">
+            <Button
+              variant="ghost"
+              onClick={handleLogout}
+              size="sm"
+              className="w-full justify-start"
+            >
               <LogOut className="h-4 w-4 mr-2" />
               로그아웃
             </Button>

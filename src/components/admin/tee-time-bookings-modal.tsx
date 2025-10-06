@@ -1,28 +1,28 @@
-'use client'
+"use client"
 
-import { useState, useEffect } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { createClient } from '@/lib/supabase/client'
+import { useState, useEffect } from "react"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { createClient } from "@/lib/supabase/client"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { useToast } from '@/components/ui/use-toast'
-import { Trash2, Plus, CheckCircle } from 'lucide-react'
-import type { TeeTime, Booking, Customer } from '@/types/database'
-import { formatCurrency } from '@/lib/utils'
+} from "@/components/ui/select"
+import { useToast } from "@/components/ui/use-toast"
+import { Trash2, Plus, CheckCircle } from "lucide-react"
+import type { TeeTime, Booking, Customer } from "@/types/database"
+import { formatCurrency } from "@/lib/utils"
 
 interface TeeTimeBookingsModalProps {
   open: boolean
@@ -40,31 +40,35 @@ export default function TeeTimeBookingsModal({
   const supabase = createClient()
 
   const [showAddForm, setShowAddForm] = useState(false)
-  const [customerMode, setCustomerMode] = useState<'existing' | 'new'>('existing')
+  const [customerMode, setCustomerMode] = useState<"existing" | "new">(
+    "existing"
+  )
   const [formData, setFormData] = useState({
-    customer_id: '',
-    name: '',
-    phone: '',
-    booking_type: 'JOIN' as 'TRANSFER' | 'JOIN',
+    customer_id: "",
+    name: "",
+    phone: "",
+    booking_type: "JOIN" as "TRANSFER" | "JOIN",
     people_count: 1,
-    companion_names: [''],
-    payment_amount: '',
-    memo: '',
+    companion_names: [""],
+    payment_amount: "",
+    memo: "",
   })
 
   // Fetch bookings for this tee time
   const { data: bookings, isLoading } = useQuery({
-    queryKey: ['teeTimeBookings', teeTime?.id],
+    queryKey: ["teeTimeBookings", teeTime?.id],
     queryFn: async () => {
       if (!teeTime) return []
       const { data, error } = await supabase
-        .from('booking')
-        .select(`
+        .from("booking")
+        .select(
+          `
           *,
           customer:customer_id (*)
-        `)
-        .eq('tee_time_id', teeTime.id)
-        .order('created_at', { ascending: false })
+        `
+        )
+        .eq("tee_time_id", teeTime.id)
+        .order("created_at", { ascending: false })
 
       if (error) throw error
       return data as (Booking & { customer: Customer | null })[]
@@ -74,12 +78,12 @@ export default function TeeTimeBookingsModal({
 
   // Fetch customers
   const { data: customers } = useQuery({
-    queryKey: ['customers'],
+    queryKey: ["customers"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('customer')
-        .select('*')
-        .order('name', { ascending: true })
+        .from("customer")
+        .select("*")
+        .order("name", { ascending: true })
 
       if (error) throw error
       return data as Customer[]
@@ -91,26 +95,29 @@ export default function TeeTimeBookingsModal({
     if (open) {
       setShowAddForm(false)
       setFormData({
-        customer_id: '',
-        name: '',
-        phone: '',
-        booking_type: 'JOIN',
+        customer_id: "",
+        name: "",
+        phone: "",
+        booking_type: "JOIN",
         people_count: 1,
-        companion_names: [''],
-        payment_amount: teeTime ? (teeTime.green_fee * 1).toString() : '',
-        memo: '',
+        companion_names: [""],
+        payment_amount: teeTime ? (teeTime.green_fee * 1).toString() : "",
+        memo: "",
       })
     }
   }, [open, teeTime])
 
   // 예약 타입 변경 시 처리
-  const handleBookingTypeChange = (type: 'TRANSFER' | 'JOIN') => {
-    if (type === 'TRANSFER' && teeTime) {
+  const handleBookingTypeChange = (type: "TRANSFER" | "JOIN") => {
+    if (type === "TRANSFER" && teeTime) {
       // 양도인 경우 전체 인원으로 설정
       const count = teeTime.slots_total
-      const newCompanionNames = Array(count).fill('').map((_, idx) =>
-        formData.companion_names[idx] || (idx === 0 ? formData.name : '')
-      )
+      const newCompanionNames = Array(count)
+        .fill("")
+        .map(
+          (_, idx) =>
+            formData.companion_names[idx] || (idx === 0 ? formData.name : "")
+        )
       setFormData({
         ...formData,
         booking_type: type,
@@ -128,9 +135,9 @@ export default function TeeTimeBookingsModal({
 
   // 인원수 변경 시 companion_names 배열 크기 조정
   const handlePeopleCountChange = (count: number) => {
-    const newCompanionNames = Array(count).fill('').map((_, idx) =>
-      formData.companion_names[idx] || ''
-    )
+    const newCompanionNames = Array(count)
+      .fill("")
+      .map((_, idx) => formData.companion_names[idx] || "")
     setFormData({
       ...formData,
       people_count: count,
@@ -150,7 +157,7 @@ export default function TeeTimeBookingsModal({
 
   // Handle customer selection
   const handleCustomerChange = (customerId: string) => {
-    const customer = customers?.find(c => c.id === customerId)
+    const customer = customers?.find((c) => c.id === customerId)
     if (customer) {
       const newCompanionNames = [...formData.companion_names]
       newCompanionNames[0] = customer.name
@@ -170,52 +177,55 @@ export default function TeeTimeBookingsModal({
       if (!teeTime) return
 
       // 모든 고객명이 입력되었는지 확인
-      const hasEmptyNames = data.companion_names.some(name => !name.trim())
+      const hasEmptyNames = data.companion_names.some((name) => !name.trim())
       if (hasEmptyNames) {
-        throw new Error('모든 고객명을 입력해주세요.')
+        throw new Error("모든 고객명을 입력해주세요.")
       }
 
       const payload = {
         tee_time_id: teeTime.id,
-        customer_id: customerMode === 'existing' ? data.customer_id || null : null,
+        customer_id:
+          customerMode === "existing" ? data.customer_id || null : null,
         name: data.name,
         phone: data.phone,
         booking_type: data.booking_type,
         people_count: data.people_count,
         companion_names: data.companion_names,
         payment_amount: parseInt(data.payment_amount) || 0,
-        status: 'PENDING' as const,
+        status: "PENDING" as const,
         memo: data.memo || null,
       }
 
-      const { error } = await supabase.from('booking').insert([payload])
+      const { error } = await supabase.from("booking").insert([payload])
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['teeTimeBookings', teeTime?.id] })
-      queryClient.invalidateQueries({ queryKey: ['bookings'] })
-      queryClient.invalidateQueries({ queryKey: ['teeTimes'] })
+      queryClient.invalidateQueries({
+        queryKey: ["teeTimeBookings", teeTime?.id],
+      })
+      queryClient.invalidateQueries({ queryKey: ["bookings"] })
+      queryClient.invalidateQueries({ queryKey: ["teeTimes"] })
       toast({
-        title: '등록 완료',
-        description: '예약이 등록되었습니다.',
+        title: "등록 완료",
+        description: "예약이 등록되었습니다.",
       })
       setShowAddForm(false)
       setFormData({
-        customer_id: '',
-        name: '',
-        phone: '',
-        booking_type: 'JOIN',
+        customer_id: "",
+        name: "",
+        phone: "",
+        booking_type: "JOIN",
         people_count: 1,
-        companion_names: [''],
-        payment_amount: teeTime ? (teeTime.green_fee * 1).toString() : '',
-        memo: '',
+        companion_names: [""],
+        payment_amount: teeTime ? (teeTime.green_fee * 1).toString() : "",
+        memo: "",
       })
     },
     onError: (error) => {
       toast({
-        title: '오류',
+        title: "오류",
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       })
     },
   })
@@ -223,23 +233,28 @@ export default function TeeTimeBookingsModal({
   // Delete booking mutation
   const deleteMutation = useMutation({
     mutationFn: async (bookingId: string) => {
-      const { error } = await supabase.from('booking').delete().eq('id', bookingId)
+      const { error } = await supabase
+        .from("booking")
+        .delete()
+        .eq("id", bookingId)
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['teeTimeBookings', teeTime?.id] })
-      queryClient.invalidateQueries({ queryKey: ['bookings'] })
-      queryClient.invalidateQueries({ queryKey: ['teeTimes'] })
+      queryClient.invalidateQueries({
+        queryKey: ["teeTimeBookings", teeTime?.id],
+      })
+      queryClient.invalidateQueries({ queryKey: ["bookings"] })
+      queryClient.invalidateQueries({ queryKey: ["teeTimes"] })
       toast({
-        title: '삭제 완료',
-        description: '예약이 삭제되었습니다.',
+        title: "삭제 완료",
+        description: "예약이 삭제되었습니다.",
       })
     },
     onError: (error) => {
       toast({
-        title: '삭제 실패',
+        title: "삭제 실패",
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       })
     },
   })
@@ -248,28 +263,30 @@ export default function TeeTimeBookingsModal({
   const confirmPaymentMutation = useMutation({
     mutationFn: async (bookingId: string) => {
       const { error } = await supabase
-        .from('booking')
+        .from("booking")
         .update({
-          status: 'CONFIRMED',
+          status: "CONFIRMED",
           paid_at: new Date().toISOString(),
         })
-        .eq('id', bookingId)
+        .eq("id", bookingId)
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['teeTimeBookings', teeTime?.id] })
-      queryClient.invalidateQueries({ queryKey: ['bookings'] })
-      queryClient.invalidateQueries({ queryKey: ['teeTimes'] })
+      queryClient.invalidateQueries({
+        queryKey: ["teeTimeBookings", teeTime?.id],
+      })
+      queryClient.invalidateQueries({ queryKey: ["bookings"] })
+      queryClient.invalidateQueries({ queryKey: ["teeTimes"] })
       toast({
-        title: '입금 확인 완료',
-        description: '예약이 확정되었습니다.',
+        title: "입금 확인 완료",
+        description: "예약이 확정되었습니다.",
       })
     },
     onError: (error) => {
       toast({
-        title: '오류',
+        title: "오류",
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       })
     },
   })
@@ -280,7 +297,7 @@ export default function TeeTimeBookingsModal({
   }
 
   const handleDelete = (bookingId: string) => {
-    if (confirm('정말 삭제하시겠습니까?')) {
+    if (confirm("정말 삭제하시겠습니까?")) {
       deleteMutation.mutate(bookingId)
     }
   }
@@ -295,7 +312,8 @@ export default function TeeTimeBookingsModal({
             예약 관리 - {teeTime.course_name} ({teeTime.date} {teeTime.time})
           </DialogTitle>
           <p className="text-sm text-gray-500 mt-1">
-            그린피: {formatCurrency(teeTime.green_fee)} | 예약현황: {teeTime.slots_booked}/{teeTime.slots_total}명
+            그린피: {formatCurrency(teeTime.green_fee)} | 예약현황:{" "}
+            {teeTime.slots_booked}/{teeTime.slots_total}명
           </p>
         </DialogHeader>
 
@@ -320,27 +338,35 @@ export default function TeeTimeBookingsModal({
                   <div
                     key={booking.id}
                     className={`flex items-center justify-between p-3 rounded-lg border-2 ${
-                      booking.status === 'CONFIRMED'
-                        ? 'bg-green-50 border-green-200'
-                        : 'bg-yellow-50 border-yellow-200'
+                      booking.status === "CONFIRMED"
+                        ? "bg-green-50 border-green-200"
+                        : "bg-yellow-50 border-yellow-200"
                     }`}
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-medium">{booking.name}</span>
-                        <span className={`text-xs px-2 py-0.5 rounded ${
-                          booking.booking_type === 'TRANSFER'
-                            ? 'bg-purple-100 text-purple-800'
-                            : 'bg-orange-100 text-orange-800'
-                        }`}>
-                          {booking.booking_type === 'TRANSFER' ? '양도' : '조인'}
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded ${
+                            booking.booking_type === "TRANSFER"
+                              ? "bg-purple-100 text-purple-800"
+                              : "bg-orange-100 text-orange-800"
+                          }`}
+                        >
+                          {booking.booking_type === "TRANSFER"
+                            ? "양도"
+                            : "조인"}
                         </span>
-                        <span className={`text-xs px-2 py-0.5 rounded font-semibold ${
-                          booking.status === 'CONFIRMED'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {booking.status === 'CONFIRMED' ? '입금완료' : '입금대기'}
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded font-semibold ${
+                            booking.status === "CONFIRMED"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {booking.status === "CONFIRMED"
+                            ? "입금완료"
+                            : "입금대기"}
                         </span>
                         {booking.customer && (
                           <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
@@ -354,23 +380,26 @@ export default function TeeTimeBookingsModal({
                       <div className="text-sm font-semibold text-blue-700 mt-1">
                         입금 금액: {formatCurrency(booking.payment_amount)}
                       </div>
-                      {booking.companion_names && booking.companion_names.length > 0 && (
-                        <div className="text-sm text-gray-700 mt-1">
-                          <span className="font-medium">고객명:</span>{' '}
-                          {booking.companion_names.join(', ')}
-                        </div>
-                      )}
+                      {booking.companion_names &&
+                        booking.companion_names.length > 0 && (
+                          <div className="text-sm text-gray-700 mt-1">
+                            <span className="font-medium">고객명:</span>{" "}
+                            {booking.companion_names.join(", ")}
+                          </div>
+                        )}
                       {booking.memo && (
-                        <div className="text-xs text-gray-500 mt-1">{booking.memo}</div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          {booking.memo}
+                        </div>
                       )}
                     </div>
                     <div className="flex gap-1">
-                      {booking.status === 'PENDING' && (
+                      {booking.status === "PENDING" && (
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => {
-                            if (confirm('입금을 확인하셨습니까?')) {
+                            if (confirm("입금을 확인하셨습니까?")) {
                               confirmPaymentMutation.mutate(booking.id)
                             }
                           }}
@@ -400,7 +429,11 @@ export default function TeeTimeBookingsModal({
             <div className="border-t pt-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-semibold">예약 추가</h3>
-                <Button onClick={() => setShowAddForm(false)} variant="ghost" size="sm">
+                <Button
+                  onClick={() => setShowAddForm(false)}
+                  variant="ghost"
+                  size="sm"
+                >
                   취소
                 </Button>
               </div>
@@ -411,27 +444,33 @@ export default function TeeTimeBookingsModal({
                   <div className="flex gap-2 mt-1">
                     <Button
                       type="button"
-                      variant={formData.booking_type === 'JOIN' ? 'default' : 'outline'}
+                      variant={
+                        formData.booking_type === "JOIN" ? "default" : "outline"
+                      }
                       size="sm"
-                      onClick={() => handleBookingTypeChange('JOIN')}
+                      onClick={() => handleBookingTypeChange("JOIN")}
                       className="flex-1"
                     >
                       조인
                     </Button>
                     <Button
                       type="button"
-                      variant={formData.booking_type === 'TRANSFER' ? 'default' : 'outline'}
+                      variant={
+                        formData.booking_type === "TRANSFER"
+                          ? "default"
+                          : "outline"
+                      }
                       size="sm"
-                      onClick={() => handleBookingTypeChange('TRANSFER')}
+                      onClick={() => handleBookingTypeChange("TRANSFER")}
                       className="flex-1"
                     >
                       양도
                     </Button>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">
-                    {formData.booking_type === 'TRANSFER'
-                      ? '양도: 전체 인원을 대표자가 가져갑니다'
-                      : '조인: 일부 인원만 예약합니다'}
+                    {formData.booking_type === "TRANSFER"
+                      ? "양도: 전체 인원을 대표자가 가져갑니다"
+                      : "조인: 일부 인원만 예약합니다"}
                   </p>
                 </div>
 
@@ -439,18 +478,20 @@ export default function TeeTimeBookingsModal({
                   <div className="flex gap-2">
                     <Button
                       type="button"
-                      variant={customerMode === 'existing' ? 'default' : 'outline'}
+                      variant={
+                        customerMode === "existing" ? "default" : "outline"
+                      }
                       size="sm"
-                      onClick={() => setCustomerMode('existing')}
+                      onClick={() => setCustomerMode("existing")}
                       className="flex-1"
                     >
                       기존 고객
                     </Button>
                     <Button
                       type="button"
-                      variant={customerMode === 'new' ? 'default' : 'outline'}
+                      variant={customerMode === "new" ? "default" : "outline"}
                       size="sm"
-                      onClick={() => setCustomerMode('new')}
+                      onClick={() => setCustomerMode("new")}
                       className="flex-1"
                     >
                       신규 고객
@@ -458,7 +499,7 @@ export default function TeeTimeBookingsModal({
                   </div>
                 </div>
 
-                {customerMode === 'existing' ? (
+                {customerMode === "existing" ? (
                   <div>
                     <Label htmlFor="customer_id">고객 선택</Label>
                     <Select
@@ -486,7 +527,9 @@ export default function TeeTimeBookingsModal({
                         value={formData.name}
                         onChange={(e) => {
                           const newName = e.target.value
-                          const newCompanionNames = [...formData.companion_names]
+                          const newCompanionNames = [
+                            ...formData.companion_names,
+                          ]
                           newCompanionNames[0] = newName
                           setFormData({
                             ...formData,
@@ -505,7 +548,9 @@ export default function TeeTimeBookingsModal({
                       <Input
                         id="phone"
                         value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, phone: e.target.value })
+                        }
                         placeholder="010-1234-5678"
                         required
                         className="mt-1"
@@ -518,8 +563,10 @@ export default function TeeTimeBookingsModal({
                   <Label htmlFor="people_count">인원</Label>
                   <Select
                     value={formData.people_count.toString()}
-                    onValueChange={(value) => handlePeopleCountChange(parseInt(value))}
-                    disabled={formData.booking_type === 'TRANSFER'}
+                    onValueChange={(value) =>
+                      handlePeopleCountChange(parseInt(value))
+                    }
+                    disabled={formData.booking_type === "TRANSFER"}
                   >
                     <SelectTrigger className="mt-1">
                       <SelectValue />
@@ -531,7 +578,7 @@ export default function TeeTimeBookingsModal({
                       <SelectItem value="4">4명</SelectItem>
                     </SelectContent>
                   </Select>
-                  {formData.booking_type === 'TRANSFER' && (
+                  {formData.booking_type === "TRANSFER" && (
                     <p className="text-xs text-gray-500 mt-1">
                       양도는 전체 {teeTime?.slots_total}명으로 자동 설정됩니다
                     </p>
@@ -545,7 +592,9 @@ export default function TeeTimeBookingsModal({
                       <Input
                         key={index}
                         value={name}
-                        onChange={(e) => handleCompanionNameChange(index, e.target.value)}
+                        onChange={(e) =>
+                          handleCompanionNameChange(index, e.target.value)
+                        }
                         placeholder={`${index + 1}번째 고객 이름`}
                         required
                       />
@@ -562,8 +611,13 @@ export default function TeeTimeBookingsModal({
                     id="payment_amount"
                     type="number"
                     value={formData.payment_amount}
-                    onChange={(e) => setFormData({ ...formData, payment_amount: e.target.value })}
-                    placeholder="150000"
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        payment_amount: e.target.value,
+                      })
+                    }
+                    placeholder="0"
                     required
                     className="mt-1"
                   />
@@ -574,14 +628,20 @@ export default function TeeTimeBookingsModal({
                   <Input
                     id="memo"
                     value={formData.memo}
-                    onChange={(e) => setFormData({ ...formData, memo: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, memo: e.target.value })
+                    }
                     placeholder="특이사항 입력"
                     className="mt-1"
                   />
                 </div>
 
-                <Button type="submit" disabled={addMutation.isPending} className="w-full">
-                  {addMutation.isPending ? '등록 중...' : '예약 추가'}
+                <Button
+                  type="submit"
+                  disabled={addMutation.isPending}
+                  className="w-full"
+                >
+                  {addMutation.isPending ? "등록 중..." : "예약 추가"}
                 </Button>
               </form>
             </div>

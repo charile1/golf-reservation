@@ -383,7 +383,7 @@ export default function BookingForm({
               onChange={(e) =>
                 setFormData({ ...formData, payment_amount: e.target.value })
               }
-              placeholder="150000"
+              placeholder="0"
               required
               className="mt-1"
             />
