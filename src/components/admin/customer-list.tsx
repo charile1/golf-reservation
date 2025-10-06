@@ -36,9 +36,6 @@ export default function CustomerList({
                 연락처
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                이메일
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 그룹
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -62,11 +59,6 @@ export default function CustomerList({
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">{customer.phone}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-500">
-                    {customer.email || '-'}
-                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span
@@ -134,14 +126,6 @@ export default function CustomerList({
                 <span className="text-gray-500">연락처:</span>
                 <div className="font-medium">{customer.phone}</div>
               </div>
-
-              {/* 이메일 */}
-              {customer.email && (
-                <div className="text-sm">
-                  <span className="text-gray-500">이메일:</span>
-                  <div className="font-medium">{customer.email}</div>
-                </div>
-              )}
 
               {/* 그룹 */}
               <div className="text-sm">

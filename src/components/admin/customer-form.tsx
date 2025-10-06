@@ -138,18 +138,6 @@ export default function CustomerForm({ open, onClose, customer }: CustomerFormPr
           </div>
 
           <div>
-            <Label htmlFor="email">이메일</Label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              placeholder="example@email.com"
-              className="mt-1"
-            />
-          </div>
-
-          <div>
             <Label htmlFor="group_type">그룹 타입</Label>
             <Select
               value={formData.group_type}
