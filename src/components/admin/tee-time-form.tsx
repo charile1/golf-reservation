@@ -94,7 +94,12 @@ export default function TeeTimeForm({ open, onClose, teeTime }: TeeTimeFormProps
           .eq('id', teeTime.id)
         if (error) throw error
       } else {
-        const { error } = await supabase.from('tee_time').insert([payload])
+        // 생성자 정보 가져오기
+        const { data: { user } } = await supabase.auth.getUser()
+        const { error } = await supabase.from('tee_time').insert([{
+          ...payload,
+          created_by: user?.email || null
+        }])
         if (error) throw error
       }
     },

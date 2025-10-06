@@ -23,6 +23,7 @@ export interface TeeTime {
   slots_booked: number
   slots_pending?: number
   status: TeeTimeStatus
+  created_by: string | null
   created_at: string
   updated_at: string
 }

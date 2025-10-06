@@ -88,6 +88,11 @@ export default function TeeTimeList({
                         </span>
                       )}
                     </div>
+                    {teeTime.created_by && (
+                      <div className="text-xs text-gray-500 mt-1">
+                        생성자: {teeTime.created_by}
+                      </div>
+                    )}
                   </div>
 
                   {/* 예약현황 */}
@@ -182,6 +187,11 @@ export default function TeeTimeList({
                     {teeTime.onsite_payment > 0 && (
                       <div className="text-sm text-gray-500 mt-0.5">
                         현장결제: {formatCurrency(teeTime.onsite_payment)}
+                      </div>
+                    )}
+                    {teeTime.created_by && (
+                      <div className="text-xs text-gray-500 mt-1">
+                        생성자: {teeTime.created_by}
                       </div>
                     )}
                   </div>

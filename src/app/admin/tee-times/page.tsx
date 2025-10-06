@@ -22,6 +22,8 @@ export default function TeeTimesPage() {
   const [selectedTeeTime, setSelectedTeeTime] = useState<TeeTime | null>(null)
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list')
+  const [createdAtFilter, setCreatedAtFilter] = useState<'all' | 'today' | 'custom'>('all')
+  const [customDate, setCustomDate] = useState<string>('')
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const supabase = createClient()
@@ -38,7 +40,7 @@ export default function TeeTimesPage() {
 
   // Fetch tee times with booking counts
   const { data: teeTimes, isLoading } = useQuery({
-    queryKey: ['teeTimes', sortOrder],
+    queryKey: ['teeTimes', sortOrder, createdAtFilter, customDate],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('tee_time')
@@ -52,7 +54,7 @@ export default function TeeTimesPage() {
       if (error) throw error
 
       // Calculate pending and confirmed counts
-      return (data as any[]).map(teeTime => {
+      const allTeeTimes = (data as any[]).map(teeTime => {
         const confirmedCount = teeTime.bookings
           ?.filter((b: any) => b.status === 'CONFIRMED')
           .reduce((sum: number, b: any) => sum + b.people_count, 0) || 0
@@ -67,6 +69,16 @@ export default function TeeTimesPage() {
           slots_pending: pendingCount,
         }
       }) as (TeeTime & { slots_pending: number })[]
+
+      // 생성일 필터 적용
+      if (createdAtFilter === 'today') {
+        const today = new Date().toISOString().split('T')[0]
+        return allTeeTimes.filter(t => t.created_at.startsWith(today))
+      } else if (createdAtFilter === 'custom' && customDate) {
+        return allTeeTimes.filter(t => t.created_at.startsWith(customDate))
+      }
+
+      return allTeeTimes
     },
   })
 
@@ -128,28 +140,51 @@ export default function TeeTimesPage() {
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">티타임 관리</h1>
               <p className="text-sm sm:text-base text-gray-600 mt-1">골프장 티타임을 등록하고 관리하세요</p>
             </div>
-            <div className="flex gap-2 w-full sm:w-auto">
-              {/* 뷰 모드 토글 */}
-              <div className="flex border rounded-md overflow-hidden">
-                <Button
-                  onClick={() => setViewMode('list')}
-                  variant={viewMode === 'list' ? 'default' : 'ghost'}
-                  size="sm"
-                  className="rounded-none"
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              {/* 생성일 필터 */}
+              <div className="flex gap-2">
+                <select
+                  value={createdAtFilter}
+                  onChange={(e) => setCreatedAtFilter(e.target.value as 'all' | 'today' | 'custom')}
+                  className="border rounded-md px-3 py-2 text-sm bg-white"
                 >
-                  <List className="h-4 w-4" />
-                </Button>
-                <Button
-                  onClick={() => setViewMode('calendar')}
-                  variant={viewMode === 'calendar' ? 'default' : 'ghost'}
-                  size="sm"
-                  className="rounded-none"
-                >
-                  <Calendar className="h-4 w-4" />
-                </Button>
+                  <option value="all">전체</option>
+                  <option value="today">오늘 생성</option>
+                  <option value="custom">날짜 선택</option>
+                </select>
+
+                {createdAtFilter === 'custom' && (
+                  <input
+                    type="date"
+                    value={customDate}
+                    onChange={(e) => setCustomDate(e.target.value)}
+                    className="border rounded-md px-3 py-2 text-sm"
+                  />
+                )}
               </div>
 
-              {viewMode === 'list' && (
+              <div className="flex gap-2">
+                {/* 뷰 모드 토글 */}
+                <div className="flex border rounded-md overflow-hidden">
+                  <Button
+                    onClick={() => setViewMode('list')}
+                    variant={viewMode === 'list' ? 'default' : 'ghost'}
+                    size="sm"
+                    className="rounded-none"
+                  >
+                    <List className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    onClick={() => setViewMode('calendar')}
+                    variant={viewMode === 'calendar' ? 'default' : 'ghost'}
+                    size="sm"
+                    className="rounded-none"
+                  >
+                    <Calendar className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {viewMode === 'list' && (
                 <Button
                   onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
                   variant="outline"
@@ -167,6 +202,7 @@ export default function TeeTimesPage() {
                 <Plus className="h-4 w-4 mr-1 sm:mr-2" />
                 티타임 등록
               </Button>
+              </div>
             </div>
           </div>
 
