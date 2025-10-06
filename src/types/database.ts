@@ -21,6 +21,7 @@ export interface TeeTime {
   onsite_payment: number
   slots_total: number
   slots_booked: number
+  slots_pending?: number
   status: TeeTimeStatus
   created_at: string
   updated_at: string
