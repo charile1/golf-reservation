@@ -41,6 +41,9 @@ export default function TransactionsPage() {
           *,
           tee_time:tee_time_id (
             time
+          ),
+          booking:booking_id (
+            name
           )
         `)
         .order('play_date', { ascending: false })

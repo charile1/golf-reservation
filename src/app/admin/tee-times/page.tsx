@@ -21,7 +21,7 @@ export default function TeeTimesPage() {
   const [isBookingsModalOpen, setIsBookingsModalOpen] = useState(false)
   const [selectedTeeTime, setSelectedTeeTime] = useState<TeeTime | null>(null)
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
-  const [viewMode, setViewMode] = useState<"list" | "calendar">("list")
+  const [viewMode, setViewMode] = useState<"list" | "calendar">("calendar")
   const [createdAtFilter, setCreatedAtFilter] = useState<
     "all" | "today" | "custom"
   >("all")
@@ -183,47 +183,51 @@ export default function TeeTimesPage() {
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-              {/* 월별 필터 */}
-              <select
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(e.target.value)}
-                className="border rounded-md px-3 py-2 text-sm bg-white"
-              >
-                {monthOptions.map((month) => {
-                  const [year, monthNum] = month.split("-")
-                  return (
-                    <option key={month} value={month}>
-                      {year}년 {parseInt(monthNum)}월
-                    </option>
-                  )
-                })}
-              </select>
+              {viewMode === "list" && (
+                <>
+                  {/* 월별 필터 */}
+                  <select
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(e.target.value)}
+                    className="border rounded-md px-3 py-2 text-sm bg-white"
+                  >
+                    {monthOptions.map((month) => {
+                      const [year, monthNum] = month.split("-")
+                      return (
+                        <option key={month} value={month}>
+                          {year}년 {parseInt(monthNum)}월
+                        </option>
+                      )
+                    })}
+                  </select>
 
-              {/* 생성일 필터 */}
-              <div className="flex gap-2">
-                <select
-                  value={createdAtFilter}
-                  onChange={(e) =>
-                    setCreatedAtFilter(
-                      e.target.value as "all" | "today" | "custom"
-                    )
-                  }
-                  className="border rounded-md px-3 py-2 text-sm bg-white"
-                >
-                  <option value="all">전체</option>
-                  <option value="today">오늘 생성된 티</option>
-                  <option value="custom">특정 날짜 선택</option>
-                </select>
+                  {/* 생성일 필터 */}
+                  <div className="flex gap-2">
+                    <select
+                      value={createdAtFilter}
+                      onChange={(e) =>
+                        setCreatedAtFilter(
+                          e.target.value as "all" | "today" | "custom"
+                        )
+                      }
+                      className="border rounded-md px-3 py-2 text-sm bg-white"
+                    >
+                      <option value="all">전체</option>
+                      <option value="today">오늘 생성된 티</option>
+                      <option value="custom">특정 날짜 선택</option>
+                    </select>
 
-                {createdAtFilter === "custom" && (
-                  <input
-                    type="date"
-                    value={customDate}
-                    onChange={(e) => setCustomDate(e.target.value)}
-                    className="border rounded-md px-3 py-2 text-sm"
-                  />
-                )}
-              </div>
+                    {createdAtFilter === "custom" && (
+                      <input
+                        type="date"
+                        value={customDate}
+                        onChange={(e) => setCustomDate(e.target.value)}
+                        className="border rounded-md px-3 py-2 text-sm"
+                      />
+                    )}
+                  </div>
+                </>
+              )}
 
               <div className="flex gap-2">
                 {/* 뷰 모드 토글 */}
