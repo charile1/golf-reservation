@@ -97,19 +97,27 @@ export default function TeeTimesPage() {
     },
   })
 
-  // 월별 옵션 추출
-  const monthOptions = teeTimes
-    ? Array.from(new Set(teeTimes.map((t) => t.date.substring(0, 7))))
-        .sort()
-        .reverse()
-    : []
+  // 월별 옵션 생성 (현재 월 기준 ±6개월)
+  const monthOptions = (() => {
+    const options: string[] = []
+    const now = new Date()
 
-  // 선택된 월이 없으면 가장 최근 월 선택
-  useEffect(() => {
-    if (!selectedMonth && monthOptions.length > 0) {
-      setSelectedMonth(monthOptions[0])
+    for (let i = -6; i <= 6; i++) {
+      const date = new Date(now.getFullYear(), now.getMonth() + i, 1)
+      const yearMonth = date.toISOString().substring(0, 7)
+      options.push(yearMonth)
     }
-  }, [monthOptions, selectedMonth])
+
+    return options.reverse()
+  })()
+
+  // 선택된 월이 없으면 현재 월 선택
+  useEffect(() => {
+    if (!selectedMonth) {
+      const currentMonth = new Date().toISOString().substring(0, 7)
+      setSelectedMonth(currentMonth)
+    }
+  }, [selectedMonth])
 
   // Delete mutation
   const deleteMutation = useMutation({
