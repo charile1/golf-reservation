@@ -65,7 +65,7 @@ export async function createTransaction(
     // 금액 정보 - 선입금이 가장 중요
     total_price: totalPrice,
     prepayment: booking.payment_amount,  // 실제 받은 선입금 (가장 중요)
-    onsite_payment: teeTime.onsite_payment,
+    onsite_payment: teeTime.onsite_payment * booking.people_count,  // 총 현장결제 금액
     cost: 0,  // 원가는 중요하지 않음
     commission: 0,  // 마진도 중요하지 않음
 

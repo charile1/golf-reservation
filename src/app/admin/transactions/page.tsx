@@ -15,7 +15,7 @@ export default function TransactionsPage() {
   const router = useRouter()
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [statusFilter, setStatusFilter] = useState<'ALL' | 'pending' | 'confirmed' | 'canceled' | 'settled'>('ALL')
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'pending' | 'confirmed' | 'canceled' | 'settled'>('confirmed')
   const [selectedMonth, setSelectedMonth] = useState<string>('')
   const { toast } = useToast()
   const queryClient = useQueryClient()
