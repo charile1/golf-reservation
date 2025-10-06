@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
-import { Calendar, ClipboardList, Clock, LogOut, Users, Menu, X } from 'lucide-react'
+import { ClipboardList, Clock, LogOut, Users, Menu, X } from 'lucide-react'
 import { useToast } from '@/components/ui/use-toast'
 import { useState, useEffect } from 'react'
 
@@ -52,7 +52,6 @@ export default function AdminNav() {
     { href: '/admin/tee-times', label: '티타임 관리', icon: Clock },
     { href: '/admin/bookings', label: '예약 관리', icon: ClipboardList },
     { href: '/admin/customers', label: '고객 관리', icon: Users },
-    { href: '/admin/calendar', label: '캘린더', icon: Calendar },
   ]
 
   return (

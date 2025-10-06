@@ -5,9 +5,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/use-toast'
-import { Plus, ArrowUpDown } from 'lucide-react'
+import { Plus, ArrowUpDown, List, Calendar } from 'lucide-react'
 import TeeTimeForm from '@/components/admin/tee-time-form'
 import TeeTimeList from '@/components/admin/tee-time-list'
+import CalendarView from '@/components/admin/calendar-view'
 import TeeTimeBookingsModal from '@/components/admin/tee-time-bookings-modal'
 import AdminNav from '@/components/admin/admin-nav'
 import type { TeeTime } from '@/types/database'
@@ -20,6 +21,7 @@ export default function TeeTimesPage() {
   const [isBookingsModalOpen, setIsBookingsModalOpen] = useState(false)
   const [selectedTeeTime, setSelectedTeeTime] = useState<TeeTime | null>(null)
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list')
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const supabase = createClient()
@@ -127,17 +129,40 @@ export default function TeeTimesPage() {
               <p className="text-sm sm:text-base text-gray-600 mt-1">골프장 티타임을 등록하고 관리하세요</p>
             </div>
             <div className="flex gap-2 w-full sm:w-auto">
-              <Button
-                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                variant="outline"
-                className="flex-1 sm:flex-none"
-                size="sm"
-              >
-                <ArrowUpDown className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">
-                  {sortOrder === 'asc' ? '빠른 날짜순' : '늦은 날짜순'}
-                </span>
-              </Button>
+              {/* 뷰 모드 토글 */}
+              <div className="flex border rounded-md overflow-hidden">
+                <Button
+                  onClick={() => setViewMode('list')}
+                  variant={viewMode === 'list' ? 'default' : 'ghost'}
+                  size="sm"
+                  className="rounded-none"
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+                <Button
+                  onClick={() => setViewMode('calendar')}
+                  variant={viewMode === 'calendar' ? 'default' : 'ghost'}
+                  size="sm"
+                  className="rounded-none"
+                >
+                  <Calendar className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {viewMode === 'list' && (
+                <Button
+                  onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                  variant="outline"
+                  className="flex-1 sm:flex-none"
+                  size="sm"
+                >
+                  <ArrowUpDown className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">
+                    {sortOrder === 'asc' ? '빠른 날짜순' : '늦은 날짜순'}
+                  </span>
+                </Button>
+              )}
+
               <Button onClick={() => setIsFormOpen(true)} className="flex-1 sm:flex-none" size="sm">
                 <Plus className="h-4 w-4 mr-1 sm:mr-2" />
                 티타임 등록
@@ -149,12 +174,17 @@ export default function TeeTimesPage() {
         <div className="text-center py-12">
           <p className="text-gray-500">로딩 중...</p>
         </div>
-      ) : (
+      ) : viewMode === 'list' ? (
         <TeeTimeList
           teeTimes={teeTimes || []}
           onEdit={handleEdit}
           onDelete={handleDelete}
           onManageBookings={handleManageBookings}
+        />
+      ) : (
+        <CalendarView
+          teeTimes={teeTimes || []}
+          onTeeTimeClick={handleManageBookings}
         />
       )}
 

@@ -27,6 +27,8 @@ export default function BookingsPage() {
   }, [router])
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingBooking, setEditingBooking] = useState<BookingWithTeeTime | null>(null)
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'PENDING' | 'CONFIRMED'>('ALL')
+  const [selectedMonth, setSelectedMonth] = useState<string>('')
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const supabase = createClient()
@@ -54,6 +56,20 @@ export default function BookingsPage() {
       return sorted
     },
   })
+
+  // 월별 옵션 추출
+  const monthOptions = bookings
+    ? Array.from(new Set(bookings.map(b => b.tee_time.date.substring(0, 7))))
+        .sort()
+        .reverse()
+    : []
+
+  // 선택된 월이 없으면 가장 최근 월 선택
+  useEffect(() => {
+    if (!selectedMonth && monthOptions.length > 0) {
+      setSelectedMonth(monthOptions[0])
+    }
+  }, [monthOptions, selectedMonth])
 
   // Delete mutation
   const deleteMutation = useMutation({
@@ -134,15 +150,61 @@ export default function BookingsPage() {
       <AdminNav />
       <div className="container mx-auto py-6 px-4">
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">예약 관리</h1>
-              <p className="text-gray-600 mt-1">고객 예약을 관리하고 입금을 확인하세요</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">예약 관리</h1>
+              <p className="text-sm sm:text-base text-gray-600 mt-1">고객 예약을 관리하고 입금을 확인하세요</p>
             </div>
-            <Button onClick={() => setIsFormOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              예약 등록
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              {/* 월별 선택 */}
+              <select
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(e.target.value)}
+                className="border rounded-md px-3 py-2 text-sm bg-white"
+              >
+                {monthOptions.map(month => {
+                  const [year, monthNum] = month.split('-')
+                  return (
+                    <option key={month} value={month}>
+                      {year}년 {parseInt(monthNum)}월
+                    </option>
+                  )
+                })}
+              </select>
+
+              <div className="flex gap-2 w-full sm:w-auto">
+              <div className="flex border rounded-md overflow-hidden flex-1 sm:flex-none">
+                <Button
+                  onClick={() => setStatusFilter('ALL')}
+                  variant={statusFilter === 'ALL' ? 'default' : 'ghost'}
+                  size="sm"
+                  className="rounded-none text-xs sm:text-sm"
+                >
+                  전체
+                </Button>
+                <Button
+                  onClick={() => setStatusFilter('PENDING')}
+                  variant={statusFilter === 'PENDING' ? 'default' : 'ghost'}
+                  size="sm"
+                  className="rounded-none text-xs sm:text-sm"
+                >
+                  입금대기
+                </Button>
+                <Button
+                  onClick={() => setStatusFilter('CONFIRMED')}
+                  variant={statusFilter === 'CONFIRMED' ? 'default' : 'ghost'}
+                  size="sm"
+                  className="rounded-none text-xs sm:text-sm"
+                >
+                  입금완료
+                </Button>
+              </div>
+              <Button onClick={() => setIsFormOpen(true)} size="sm">
+                <Plus className="h-4 w-4 mr-2" />
+                예약 등록
+              </Button>
+              </div>
+            </div>
           </div>
 
           {isLoading ? (
@@ -151,7 +213,12 @@ export default function BookingsPage() {
             </div>
           ) : (
             <BookingList
-              bookings={bookings || []}
+              bookings={
+                (statusFilter === 'ALL'
+                  ? bookings || []
+                  : (bookings || []).filter(b => b.status === statusFilter)
+                ).filter(b => b.tee_time.date.startsWith(selectedMonth))
+              }
               onEdit={handleEdit}
               onDelete={handleDelete}
               onConfirmPayment={handleConfirmPayment}

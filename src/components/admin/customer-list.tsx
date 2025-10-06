@@ -24,7 +24,8 @@ export default function CustomerList({
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
-      <div className="overflow-x-auto">
+      {/* 데스크톱 테이블 뷰 */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -94,6 +95,68 @@ export default function CustomerList({
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* 모바일 카드 뷰 */}
+      <div className="md:hidden divide-y divide-gray-200">
+        {customers.map((customer) => (
+          <div key={customer.id} className="p-4 hover:bg-gray-50">
+            <div className="space-y-3">
+              {/* 고객명 */}
+              <div>
+                <div className="font-medium text-gray-900 text-lg">
+                  {customer.name}
+                </div>
+              </div>
+
+              {/* 연락처 */}
+              <div className="text-sm">
+                <span className="text-gray-500">연락처:</span>
+                <div className="font-medium">{customer.phone}</div>
+              </div>
+
+              {/* 이메일 */}
+              {customer.email && (
+                <div className="text-sm">
+                  <span className="text-gray-500">이메일:</span>
+                  <div className="font-medium">{customer.email}</div>
+                </div>
+              )}
+
+              {/* 메모 */}
+              {customer.memo && (
+                <div className="text-sm">
+                  <span className="text-gray-500">메모:</span>
+                  <div className="text-gray-700">{customer.memo}</div>
+                </div>
+              )}
+
+              {/* 등록일 */}
+              <div className="text-xs text-gray-500">
+                등록일: {formatDateTime(customer.created_at)}
+              </div>
+
+              {/* 작업 버튼 */}
+              <div className="flex justify-end gap-2 pt-2 border-t">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onEdit(customer)}
+                >
+                  <Edit className="h-4 w-4 mr-1" />
+                  수정
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onDelete(customer.id)}
+                >
+                  <Trash2 className="h-4 w-4 text-red-500" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )

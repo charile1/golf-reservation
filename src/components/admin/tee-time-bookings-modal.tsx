@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useToast } from '@/components/ui/use-toast'
-import { Trash2, Plus } from 'lucide-react'
+import { Trash2, Plus, CheckCircle } from 'lucide-react'
 import type { TeeTime, Booking, Customer } from '@/types/database'
 import { formatCurrency } from '@/lib/utils'
 
@@ -48,6 +48,7 @@ export default function TeeTimeBookingsModal({
     booking_type: 'JOIN' as 'TRANSFER' | 'JOIN',
     people_count: 1,
     companion_names: [''],
+    payment_amount: '',
     memo: '',
   })
 
@@ -96,10 +97,11 @@ export default function TeeTimeBookingsModal({
         booking_type: 'JOIN',
         people_count: 1,
         companion_names: [''],
+        payment_amount: teeTime ? (teeTime.green_fee * 1).toString() : '',
         memo: '',
       })
     }
-  }, [open])
+  }, [open, teeTime])
 
   // 예약 타입 변경 시 처리
   const handleBookingTypeChange = (type: 'TRANSFER' | 'JOIN') => {
@@ -181,6 +183,7 @@ export default function TeeTimeBookingsModal({
         booking_type: data.booking_type,
         people_count: data.people_count,
         companion_names: data.companion_names,
+        payment_amount: parseInt(data.payment_amount) || 0,
         status: 'PENDING' as const,
         memo: data.memo || null,
       }
@@ -204,6 +207,7 @@ export default function TeeTimeBookingsModal({
         booking_type: 'JOIN',
         people_count: 1,
         companion_names: [''],
+        payment_amount: teeTime ? (teeTime.green_fee * 1).toString() : '',
         memo: '',
       })
     },
@@ -234,6 +238,36 @@ export default function TeeTimeBookingsModal({
     onError: (error) => {
       toast({
         title: '삭제 실패',
+        description: error.message,
+        variant: 'destructive',
+      })
+    },
+  })
+
+  // Confirm payment mutation
+  const confirmPaymentMutation = useMutation({
+    mutationFn: async (bookingId: string) => {
+      const { error } = await supabase
+        .from('booking')
+        .update({
+          status: 'CONFIRMED',
+          paid_at: new Date().toISOString(),
+        })
+        .eq('id', bookingId)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['teeTimeBookings', teeTime?.id] })
+      queryClient.invalidateQueries({ queryKey: ['bookings'] })
+      queryClient.invalidateQueries({ queryKey: ['teeTimes'] })
+      toast({
+        title: '입금 확인 완료',
+        description: '예약이 확정되었습니다.',
+      })
+    },
+    onError: (error) => {
+      toast({
+        title: '오류',
         description: error.message,
         variant: 'destructive',
       })
@@ -285,10 +319,14 @@ export default function TeeTimeBookingsModal({
                 {bookings.map((booking) => (
                   <div
                     key={booking.id}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                    className={`flex items-center justify-between p-3 rounded-lg border-2 ${
+                      booking.status === 'CONFIRMED'
+                        ? 'bg-green-50 border-green-200'
+                        : 'bg-yellow-50 border-yellow-200'
+                    }`}
                   >
                     <div className="flex-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-medium">{booking.name}</span>
                         <span className={`text-xs px-2 py-0.5 rounded ${
                           booking.booking_type === 'TRANSFER'
@@ -297,14 +335,24 @@ export default function TeeTimeBookingsModal({
                         }`}>
                           {booking.booking_type === 'TRANSFER' ? '양도' : '조인'}
                         </span>
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        {booking.phone} | {booking.people_count}명
+                        <span className={`text-xs px-2 py-0.5 rounded font-semibold ${
+                          booking.status === 'CONFIRMED'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {booking.status === 'CONFIRMED' ? '입금완료' : '입금대기'}
+                        </span>
                         {booking.customer && (
-                          <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
                             등록고객
                           </span>
                         )}
+                      </div>
+                      <div className="text-sm text-gray-600 mt-1">
+                        {booking.phone} | {booking.people_count}명
+                      </div>
+                      <div className="text-sm font-semibold text-blue-700 mt-1">
+                        입금 금액: {formatCurrency(booking.payment_amount)}
                       </div>
                       {booking.companion_names && booking.companion_names.length > 0 && (
                         <div className="text-sm text-gray-700 mt-1">
@@ -316,13 +364,29 @@ export default function TeeTimeBookingsModal({
                         <div className="text-xs text-gray-500 mt-1">{booking.memo}</div>
                       )}
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(booking.id)}
-                    >
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
+                    <div className="flex gap-1">
+                      {booking.status === 'PENDING' && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            if (confirm('입금을 확인하셨습니까?')) {
+                              confirmPaymentMutation.mutate(booking.id)
+                            }
+                          }}
+                          className="text-green-600 hover:text-green-700"
+                        >
+                          <CheckCircle className="h-4 w-4" />
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(booking.id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -490,6 +554,19 @@ export default function TeeTimeBookingsModal({
                   <p className="text-xs text-gray-500 mt-1">
                     모든 고객명을 입력해주세요. 골프장에 전달됩니다.
                   </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="payment_amount">입금 금액 (원)</Label>
+                  <Input
+                    id="payment_amount"
+                    type="number"
+                    value={formData.payment_amount}
+                    onChange={(e) => setFormData({ ...formData, payment_amount: e.target.value })}
+                    placeholder="150000"
+                    required
+                    className="mt-1"
+                  />
                 </div>
 
                 <div>

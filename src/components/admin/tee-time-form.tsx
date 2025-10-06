@@ -33,14 +33,22 @@ export default function TeeTimeForm({ open, onClose, teeTime }: TeeTimeFormProps
   const queryClient = useQueryClient()
   const supabase = createClient()
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    date: string
+    time: string
+    course_name: string
+    green_fee: string
+    onsite_payment: string
+    slots_total: string
+    status: 'AVAILABLE' | 'JOINING' | 'CONFIRMED' | 'CANCELED'
+  }>({
     date: '',
     time: '',
     course_name: '오션비치리조트',
     green_fee: '',
     onsite_payment: '',
     slots_total: '4',
-    status: 'AVAILABLE' as const,
+    status: 'AVAILABLE',
   })
 
   useEffect(() => {
@@ -116,7 +124,7 @@ export default function TeeTimeForm({ open, onClose, teeTime }: TeeTimeFormProps
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto overflow-x-hidden">
         <DialogHeader>
           <DialogTitle>{teeTime ? '티타임 수정' : '티타임 등록'}</DialogTitle>
         </DialogHeader>
@@ -131,7 +139,8 @@ export default function TeeTimeForm({ open, onClose, teeTime }: TeeTimeFormProps
                 setFormData({ ...formData, date: e.target.value })
               }
               required
-              className="mt-1"
+              className="mt-1 w-full max-w-full"
+              style={{ maxWidth: '100%' }}
             />
           </div>
 
@@ -145,7 +154,8 @@ export default function TeeTimeForm({ open, onClose, teeTime }: TeeTimeFormProps
                 setFormData({ ...formData, time: e.target.value })
               }
               required
-              className="mt-1"
+              className="mt-1 w-full max-w-full"
+              style={{ maxWidth: '100%' }}
             />
           </div>
 

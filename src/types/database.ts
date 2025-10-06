@@ -35,6 +35,7 @@ export interface Booking {
   people_count: number
   companion_names: string[] | null
   booking_type: BookingType
+  payment_amount: number
   status: BookingStatus
   paid_at: string | null
   memo: string | null
