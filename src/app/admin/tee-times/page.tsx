@@ -174,13 +174,34 @@ export default function TeeTimesPage() {
         <div className="container mx-auto py-6 px-4">
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                티타임 관리
-              </h1>
-              <p className="text-sm sm:text-base text-gray-600 mt-1">
-                골프장 티타임을 등록하고 관리하세요
-              </p>
+            <div className="flex items-center justify-between gap-4 w-full sm:w-auto">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                  티타임 관리
+                </h1>
+                <p className="text-sm sm:text-base text-gray-600 mt-1">
+                  골프장 티타임을 등록하고 관리하세요
+                </p>
+              </div>
+              {/* 뷰 모드 토글 */}
+              <div className="flex border rounded-md overflow-hidden">
+                <Button
+                  onClick={() => setViewMode("list")}
+                  variant={viewMode === "list" ? "default" : "ghost"}
+                  size="sm"
+                  className="rounded-none"
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+                <Button
+                  onClick={() => setViewMode("calendar")}
+                  variant={viewMode === "calendar" ? "default" : "ghost"}
+                  size="sm"
+                  className="rounded-none"
+                >
+                  <Calendar className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               {viewMode === "list" && (
@@ -229,34 +250,14 @@ export default function TeeTimesPage() {
                 </>
               )}
 
-              <div className="flex gap-2">
-                {/* 뷰 모드 토글 */}
-                <div className="flex border rounded-md overflow-hidden">
-                  <Button
-                    onClick={() => setViewMode("list")}
-                    variant={viewMode === "list" ? "default" : "ghost"}
-                    size="sm"
-                    className="rounded-none"
-                  >
-                    <List className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    onClick={() => setViewMode("calendar")}
-                    variant={viewMode === "calendar" ? "default" : "ghost"}
-                    size="sm"
-                    className="rounded-none"
-                  >
-                    <Calendar className="h-4 w-4" />
-                  </Button>
-                </div>
-
+              <div className="flex flex-col gap-2 w-full sm:w-auto">
                 {viewMode === "list" && (
                   <Button
                     onClick={() =>
                       setSortOrder(sortOrder === "asc" ? "desc" : "asc")
                     }
                     variant="outline"
-                    className="flex-1 sm:flex-none"
+                    className="w-full sm:w-auto"
                     size="sm"
                   >
                     <ArrowUpDown className="h-4 w-4 sm:mr-2" />
@@ -268,10 +269,10 @@ export default function TeeTimesPage() {
 
                 <Button
                   onClick={() => setIsFormOpen(true)}
-                  className="flex-1 sm:flex-none"
-                  size="sm"
+                  className="w-full"
+                  size="default"
                 >
-                  <Plus className="h-4 w-4 mr-1 sm:mr-2" />
+                  <Plus className="h-5 w-5 mr-2" />
                   티타임 등록
                 </Button>
               </div>

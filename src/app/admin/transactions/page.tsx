@@ -174,7 +174,7 @@ export default function TransactionsPage() {
                   size="sm"
                   className="rounded-none text-xs sm:text-sm"
                 >
-                  확정
+                  마감
                 </Button>
                 <Button
                   onClick={() => setStatusFilter('settled')}

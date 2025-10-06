@@ -29,7 +29,7 @@ export default function TransactionList({ transactions, onEdit }: TransactionLis
       case 'pending':
         return '대기'
       case 'confirmed':
-        return '확정'
+        return '마감'
       case 'canceled':
         return '취소'
       case 'settled':

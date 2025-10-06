@@ -193,7 +193,7 @@ export default function TransactionEditModal({
                 className="w-full mt-1 border rounded-md px-3 py-2 text-sm"
               >
                 <option value="pending">대기</option>
-                <option value="confirmed">확정</option>
+                <option value="confirmed">마감</option>
                 <option value="settled">정산완료</option>
                 <option value="canceled">취소</option>
               </select>
