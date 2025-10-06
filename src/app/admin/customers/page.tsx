@@ -86,8 +86,9 @@ export default function CustomersPage() {
   return (
     <>
       <AdminNav />
-      <div className="container mx-auto py-6 px-4">
-        <div className="space-y-6">
+      <div className="lg:ml-64">
+        <div className="container mx-auto py-6 px-4">
+          <div className="space-y-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">고객 관리</h1>
@@ -157,6 +158,7 @@ export default function CustomersPage() {
             onClose={handleFormClose}
             customer={editingCustomer}
           />
+          </div>
         </div>
       </div>
     </>

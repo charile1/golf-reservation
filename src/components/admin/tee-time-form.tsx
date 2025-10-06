@@ -44,8 +44,6 @@ export default function TeeTimeForm({
     green_fee: string
     onsite_payment: string
     slots_total: string
-    revenue_type: "standard" | "package" | "buyout"
-    cost_price: string
     status: "AVAILABLE" | "JOINING" | "CONFIRMED" | "CANCELED"
   }>({
     date: "",
@@ -54,8 +52,6 @@ export default function TeeTimeForm({
     green_fee: "",
     onsite_payment: "",
     slots_total: "4",
-    revenue_type: "standard",
-    cost_price: "0",
     status: "AVAILABLE",
   })
 
@@ -68,8 +64,6 @@ export default function TeeTimeForm({
         green_fee: teeTime.green_fee.toString(),
         onsite_payment: teeTime.onsite_payment?.toString() || "0",
         slots_total: teeTime.slots_total.toString(),
-        revenue_type: teeTime.revenue_type,
-        cost_price: teeTime.cost_price?.toString() || "0",
         status: teeTime.status,
       })
     } else {
@@ -84,8 +78,6 @@ export default function TeeTimeForm({
         green_fee: "",
         onsite_payment: "0",
         slots_total: "4",
-        revenue_type: "standard",
-        cost_price: "0",
         status: "AVAILABLE",
       })
     }
@@ -100,8 +92,8 @@ export default function TeeTimeForm({
         green_fee: parseInt(data.green_fee),
         onsite_payment: parseInt(data.onsite_payment) || 0,
         slots_total: parseInt(data.slots_total),
-        revenue_type: data.revenue_type,
-        cost_price: parseInt(data.cost_price) || 0,
+        revenue_type: 'standard',  // 기본값으로 설정
+        cost_price: 0,  // 기본값 0
         status: data.status,
       }
 
@@ -174,146 +166,91 @@ export default function TeeTimeForm({
           <DialogTitle>{teeTime ? "티타임 수정" : "티타임 등록"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="date">날짜</Label>
-            <Input
-              id="date"
-              type="date"
-              value={formData.date}
-              onChange={(e) =>
-                setFormData({ ...formData, date: e.target.value })
-              }
-              required
-              className="mt-1 w-full max-w-full"
-              style={{ maxWidth: "100%" }}
-            />
-            {formData.date && (
-              <p className="text-sm text-gray-600 mt-1">
-                {new Date(formData.date + 'T00:00:00').toLocaleDateString('ko-KR', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
-              </p>
-            )}
+          {/* 골프장명 & 상태 */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="course_name">골프장명</Label>
+              <Select
+                value={formData.course_name}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, course_name: value })
+                }
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="오션비치리조트">오션비치리조트</SelectItem>
+                  <SelectItem value="오션힐스포항">오션힐스포항</SelectItem>
+                  <SelectItem value="오션힐스영천">오션힐스영천</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="status">상태</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value: any) =>
+                  setFormData({ ...formData, status: value })
+                }
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="AVAILABLE">예약 대기</SelectItem>
+                  <SelectItem value="JOINING">조인 모집 중</SelectItem>
+                  <SelectItem value="CONFIRMED">예약 확정</SelectItem>
+                  <SelectItem value="CANCELED">취소</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          <div>
-            <Label htmlFor="time">시간</Label>
-            <Input
-              id="time"
-              type="time"
-              value={formData.time}
-              onChange={(e) =>
-                setFormData({ ...formData, time: e.target.value })
-              }
-              required
-              className="mt-1 w-full max-w-full"
-              style={{ maxWidth: "100%" }}
-            />
+          {/* 날짜 & 시간 */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="date">날짜</Label>
+              <Input
+                id="date"
+                type="date"
+                value={formData.date}
+                onChange={(e) =>
+                  setFormData({ ...formData, date: e.target.value })
+                }
+                required
+                className="mt-1"
+              />
+              {formData.date && (
+                <p className="text-xs text-gray-500 mt-1">
+                  {new Date(formData.date + 'T00:00:00').toLocaleDateString('ko-KR', {
+                    weekday: 'short',
+                    month: 'numeric',
+                    day: 'numeric'
+                  })}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="time">시간</Label>
+              <Input
+                id="time"
+                type="time"
+                value={formData.time}
+                onChange={(e) =>
+                  setFormData({ ...formData, time: e.target.value })
+                }
+                required
+                className="mt-1"
+              />
+            </div>
           </div>
 
+          {/* 인원수 */}
           <div>
-            <Label htmlFor="course_name">골프장명</Label>
-            <Select
-              value={formData.course_name}
-              onValueChange={(value) =>
-                setFormData({ ...formData, course_name: value })
-              }
-            >
-              <SelectTrigger className="mt-1">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="오션비치리조트">오션비치리조트</SelectItem>
-                <SelectItem value="오션힐스포항">오션힐스포항</SelectItem>
-                <SelectItem value="오션힐스영천">오션힐스영천</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="green_fee">선입금 (원)</Label>
-            <Input
-              id="green_fee"
-              type="number"
-              value={formData.green_fee}
-              onChange={(e) =>
-                setFormData({ ...formData, green_fee: e.target.value })
-              }
-              placeholder="0"
-              required
-              className="mt-1"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              선입금 금액을 입력해 주세요
-            </p>
-          </div>
-
-          <div>
-            <Label htmlFor="onsite_payment">현장 결제 (원)</Label>
-            <Input
-              id="onsite_payment"
-              type="number"
-              value={formData.onsite_payment}
-              onChange={(e) =>
-                setFormData({ ...formData, onsite_payment: e.target.value })
-              }
-              placeholder="0"
-              className="mt-1"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              카트비, 캐디피 등 고객이 현장에서 결제할 금액을 입력하세요
-              (선택사항)
-            </p>
-          </div>
-
-          <div>
-            <Label htmlFor="revenue_type">수익 모델</Label>
-            <Select
-              value={formData.revenue_type}
-              onValueChange={(value: "standard" | "package" | "buyout") =>
-                setFormData({ ...formData, revenue_type: value })
-              }
-            >
-              <SelectTrigger className="mt-1">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="standard">일반 (선입금이 마진)</SelectItem>
-                <SelectItem value="package">패키지 (차액 마진)</SelectItem>
-                <SelectItem value="buyout">선매입 (총액-원가)</SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-gray-500 mt-1">
-              수익 계산 방식을 선택하세요
-            </p>
-          </div>
-
-          <div>
-            <Label htmlFor="cost_price">원가 (원)</Label>
-            <Input
-              id="cost_price"
-              type="number"
-              value={formData.cost_price}
-              onChange={(e) =>
-                setFormData({ ...formData, cost_price: e.target.value })
-              }
-              placeholder="0"
-              className="mt-1"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              {formData.revenue_type === "standard"
-                ? "일반 모델은 원가가 0입니다"
-                : formData.revenue_type === "package"
-                ? "패키지 원가 (숙박, 식사, 그린피 등)"
-                : "선매입 원가 (티타임 매입가)"}
-            </p>
-          </div>
-
-          <div>
-            <Label htmlFor="slots_total">총 인원</Label>
+            <Label htmlFor="slots_total">인원수</Label>
             <Select
               value={formData.slots_total}
               onValueChange={(value) =>
@@ -332,24 +269,36 @@ export default function TeeTimeForm({
             </Select>
           </div>
 
-          <div>
-            <Label htmlFor="status">상태</Label>
-            <Select
-              value={formData.status}
-              onValueChange={(value: any) =>
-                setFormData({ ...formData, status: value })
-              }
-            >
-              <SelectTrigger className="mt-1">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="AVAILABLE">등록</SelectItem>
-                <SelectItem value="JOINING">조인모집</SelectItem>
-                <SelectItem value="CONFIRMED">확정</SelectItem>
-                <SelectItem value="CANCELED">취소</SelectItem>
-              </SelectContent>
-            </Select>
+          {/* 선입금 & 현장결제 */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="green_fee">선입금 (원)</Label>
+              <Input
+                id="green_fee"
+                type="number"
+                value={formData.green_fee}
+                onChange={(e) =>
+                  setFormData({ ...formData, green_fee: e.target.value })
+                }
+                placeholder="0"
+                required
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="onsite_payment">현장결제 (원)</Label>
+              <Input
+                id="onsite_payment"
+                type="number"
+                value={formData.onsite_payment}
+                onChange={(e) =>
+                  setFormData({ ...formData, onsite_payment: e.target.value })
+                }
+                placeholder="0"
+                className="mt-1"
+              />
+            </div>
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">

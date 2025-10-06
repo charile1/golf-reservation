@@ -92,7 +92,41 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS transaction_updated_at ON transaction;
 CREATE TRIGGER transaction_updated_at
     BEFORE UPDATE ON transaction
     FOR EACH ROW
     EXECUTE FUNCTION update_transaction_updated_at();
+
+-- 3. Enable Row Level Security (RLS)
+ALTER TABLE transaction ENABLE ROW LEVEL SECURITY;
+
+-- 4. Create RLS policies for transaction table
+-- Policy: 인증된 사용자만 모든 데이터 조회 가능
+CREATE POLICY "Allow authenticated users to read all transactions"
+ON transaction
+FOR SELECT
+TO authenticated
+USING (true);
+
+-- Policy: 인증된 사용자만 데이터 생성 가능
+CREATE POLICY "Allow authenticated users to insert transactions"
+ON transaction
+FOR INSERT
+TO authenticated
+WITH CHECK (true);
+
+-- Policy: 인증된 사용자만 데이터 수정 가능
+CREATE POLICY "Allow authenticated users to update transactions"
+ON transaction
+FOR UPDATE
+TO authenticated
+USING (true)
+WITH CHECK (true);
+
+-- Policy: 인증된 사용자만 데이터 삭제 가능
+CREATE POLICY "Allow authenticated users to delete transactions"
+ON transaction
+FOR DELETE
+TO authenticated
+USING (true);

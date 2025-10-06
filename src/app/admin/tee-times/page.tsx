@@ -170,7 +170,8 @@ export default function TeeTimesPage() {
   return (
     <>
       <AdminNav />
-      <div className="container mx-auto py-6 px-4">
+      <div className="lg:ml-64">
+        <div className="container mx-auto py-6 px-4">
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
@@ -302,6 +303,7 @@ export default function TeeTimesPage() {
             onClose={handleBookingsModalClose}
             teeTime={selectedTeeTime}
           />
+        </div>
         </div>
       </div>
     </>

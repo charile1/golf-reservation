@@ -187,11 +187,26 @@ export default function BookingForm({
       }
 
       if (booking) {
+        // 예약 수정
         const { error } = await supabase
           .from("booking")
           .update(payload)
           .eq("id", booking.id)
         if (error) throw error
+
+        // transaction도 함께 업데이트 (선입금 금액 동기화)
+        const { error: txError } = await supabase
+          .from("transaction")
+          .update({
+            prepayment: parseInt(data.payment_amount) || 0,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("booking_id", booking.id)
+
+        // transaction이 없어도 에러로 처리하지 않음 (아직 생성 전일 수 있음)
+        if (txError) {
+          console.warn('Transaction update failed:', txError)
+        }
       } else {
         const { error } = await supabase.from("booking").insert([payload])
         if (error) throw error
@@ -200,6 +215,7 @@ export default function BookingForm({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bookings"] })
       queryClient.invalidateQueries({ queryKey: ["teeTimes"] })
+      queryClient.invalidateQueries({ queryKey: ["transactions"] })
       toast({
         title: booking ? "수정 완료" : "등록 완료",
         description: booking
