@@ -1,26 +1,26 @@
-'use client'
+"use client"
 
-import { useEffect, useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { createClient } from '@/lib/supabase/client'
+import { useEffect, useState } from "react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { createClient } from "@/lib/supabase/client"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { useToast } from '@/components/ui/use-toast'
-import type { TeeTime } from '@/types/database'
+} from "@/components/ui/select"
+import { useToast } from "@/components/ui/use-toast"
+import type { TeeTime } from "@/types/database"
 
 interface TeeTimeFormProps {
   open: boolean
@@ -28,7 +28,11 @@ interface TeeTimeFormProps {
   teeTime?: TeeTime | null
 }
 
-export default function TeeTimeForm({ open, onClose, teeTime }: TeeTimeFormProps) {
+export default function TeeTimeForm({
+  open,
+  onClose,
+  teeTime,
+}: TeeTimeFormProps) {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const supabase = createClient()
@@ -40,15 +44,15 @@ export default function TeeTimeForm({ open, onClose, teeTime }: TeeTimeFormProps
     green_fee: string
     onsite_payment: string
     slots_total: string
-    status: 'AVAILABLE' | 'JOINING' | 'CONFIRMED' | 'CANCELED'
+    status: "AVAILABLE" | "JOINING" | "CONFIRMED" | "CANCELED"
   }>({
-    date: '',
-    time: '',
-    course_name: '오션비치리조트',
-    green_fee: '',
-    onsite_payment: '',
-    slots_total: '4',
-    status: 'AVAILABLE',
+    date: "",
+    time: "",
+    course_name: "오션비치리조트",
+    green_fee: "",
+    onsite_payment: "",
+    slots_total: "4",
+    status: "AVAILABLE",
   })
 
   useEffect(() => {
@@ -58,23 +62,23 @@ export default function TeeTimeForm({ open, onClose, teeTime }: TeeTimeFormProps
         time: teeTime.time,
         course_name: teeTime.course_name,
         green_fee: teeTime.green_fee.toString(),
-        onsite_payment: teeTime.onsite_payment?.toString() || '0',
+        onsite_payment: teeTime.onsite_payment?.toString() || "0",
         slots_total: teeTime.slots_total.toString(),
         status: teeTime.status,
       })
     } else {
       const now = new Date()
-      const today = now.toISOString().split('T')[0]
+      const today = now.toISOString().split("T")[0]
       const currentTime = now.toTimeString().slice(0, 5)
 
       setFormData({
         date: today,
         time: currentTime,
-        course_name: '오션비치리조트',
-        green_fee: '',
-        onsite_payment: '0',
-        slots_total: '4',
-        status: 'AVAILABLE',
+        course_name: "오션비치리조트",
+        green_fee: "",
+        onsite_payment: "0",
+        slots_total: "4",
+        status: "AVAILABLE",
       })
     }
   }, [teeTime, open])
@@ -93,36 +97,41 @@ export default function TeeTimeForm({ open, onClose, teeTime }: TeeTimeFormProps
 
       if (teeTime) {
         const { error } = await supabase
-          .from('tee_time')
+          .from("tee_time")
           .update(payload)
-          .eq('id', teeTime.id)
+          .eq("id", teeTime.id)
         if (error) throw error
       } else {
         // 생성자 정보 가져오기
-        const { data: { user } } = await supabase.auth.getUser()
-        const nickname = user?.user_metadata?.name || user?.email?.split('@')[0] || null
-        const { error } = await supabase.from('tee_time').insert([{
-          ...payload,
-          created_by: nickname
-        }])
+        const {
+          data: { user },
+        } = await supabase.auth.getUser()
+        const nickname =
+          user?.user_metadata?.name || user?.email?.split("@")[0] || null
+        const { error } = await supabase.from("tee_time").insert([
+          {
+            ...payload,
+            created_by: nickname,
+          },
+        ])
         if (error) throw error
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['teeTimes'] })
+      queryClient.invalidateQueries({ queryKey: ["teeTimes"] })
       toast({
-        title: teeTime ? '수정 완료' : '등록 완료',
+        title: teeTime ? "수정 완료" : "등록 완료",
         description: teeTime
-          ? '티타임이 수정되었습니다.'
-          : '티타임이 등록되었습니다.',
+          ? "티타임이 수정되었습니다."
+          : "티타임이 등록되었습니다.",
       })
       onClose()
     },
     onError: (error) => {
       toast({
-        title: '오류',
+        title: "오류",
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       })
     },
   })
@@ -136,7 +145,7 @@ export default function TeeTimeForm({ open, onClose, teeTime }: TeeTimeFormProps
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto overflow-x-hidden">
         <DialogHeader>
-          <DialogTitle>{teeTime ? '티타임 수정' : '티타임 등록'}</DialogTitle>
+          <DialogTitle>{teeTime ? "티타임 수정" : "티타임 등록"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -150,8 +159,18 @@ export default function TeeTimeForm({ open, onClose, teeTime }: TeeTimeFormProps
               }
               required
               className="mt-1 w-full max-w-full"
-              style={{ maxWidth: '100%' }}
+              style={{ maxWidth: "100%" }}
             />
+            {formData.date && (
+              <p className="text-sm text-gray-600 mt-1">
+                {new Date(formData.date + 'T00:00:00').toLocaleDateString('ko-KR', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </p>
+            )}
           </div>
 
           <div>
@@ -165,7 +184,7 @@ export default function TeeTimeForm({ open, onClose, teeTime }: TeeTimeFormProps
               }
               required
               className="mt-1 w-full max-w-full"
-              style={{ maxWidth: '100%' }}
+              style={{ maxWidth: "100%" }}
             />
           </div>
 
@@ -189,7 +208,7 @@ export default function TeeTimeForm({ open, onClose, teeTime }: TeeTimeFormProps
           </div>
 
           <div>
-            <Label htmlFor="green_fee">그린피 (원)</Label>
+            <Label htmlFor="green_fee">선입금 (원)</Label>
             <Input
               id="green_fee"
               type="number"
@@ -197,10 +216,13 @@ export default function TeeTimeForm({ open, onClose, teeTime }: TeeTimeFormProps
               onChange={(e) =>
                 setFormData({ ...formData, green_fee: e.target.value })
               }
-              placeholder="150000"
+              placeholder="0"
               required
               className="mt-1"
             />
+            <p className="text-xs text-gray-500 mt-1">
+              선입금 금액을 입력해 주세요
+            </p>
           </div>
 
           <div>
@@ -216,7 +238,8 @@ export default function TeeTimeForm({ open, onClose, teeTime }: TeeTimeFormProps
               className="mt-1"
             />
             <p className="text-xs text-gray-500 mt-1">
-              카트비, 캐디피 등 현장에서 결제할 금액
+              카트비, 캐디피 등 고객이 현장에서 결제할 금액을 입력하세요
+              (선택사항)
             </p>
           </div>
 
@@ -265,7 +288,7 @@ export default function TeeTimeForm({ open, onClose, teeTime }: TeeTimeFormProps
               취소
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? '저장 중...' : '저장'}
+              {mutation.isPending ? "저장 중..." : "저장"}
             </Button>
           </div>
         </form>
