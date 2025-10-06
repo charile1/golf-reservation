@@ -40,9 +40,6 @@ export default function TeeTimeBookingsModal({
   const supabase = createClient()
 
   const [showAddForm, setShowAddForm] = useState(false)
-  const [customerMode, setCustomerMode] = useState<"existing" | "new">(
-    "existing"
-  )
   const [formData, setFormData] = useState({
     customer_id: "",
     name: "",
@@ -99,8 +96,8 @@ export default function TeeTimeBookingsModal({
         name: "",
         phone: "",
         booking_type: "JOIN",
-        people_count: 1,
-        companion_names: [""],
+        people_count: 0,
+        companion_names: [],
         payment_amount: teeTime ? (teeTime.green_fee * 1).toString() : "",
         memo: "",
       })
@@ -155,17 +152,16 @@ export default function TeeTimeBookingsModal({
     })
   }
 
-  // Handle customer selection
-  const handleCustomerChange = (customerId: string) => {
+  // Handle customer selection - 고객 이름을 입력 필드에 추가
+  const handleCustomerSelect = (customerId: string) => {
     const customer = customers?.find((c) => c.id === customerId)
     if (customer) {
-      const newCompanionNames = [...formData.companion_names]
-      newCompanionNames[0] = customer.name
+      // 새로운 이름 추가
+      const newCompanionNames = [...formData.companion_names, customer.name]
       setFormData({
         ...formData,
-        customer_id: customerId,
-        name: customer.name,
-        phone: customer.phone,
+        customer_id: "",
+        people_count: newCompanionNames.length,
         companion_names: newCompanionNames,
       })
     }
@@ -184,10 +180,9 @@ export default function TeeTimeBookingsModal({
 
       const payload = {
         tee_time_id: teeTime.id,
-        customer_id:
-          customerMode === "existing" ? data.customer_id || null : null,
-        name: data.name,
-        phone: data.phone,
+        customer_id: null,
+        name: data.companion_names[0], // 첫 번째 이름을 대표자로
+        phone: data.phone || "미입력",
         booking_type: data.booking_type,
         people_count: data.people_count,
         companion_names: data.companion_names,
@@ -215,8 +210,8 @@ export default function TeeTimeBookingsModal({
         name: "",
         phone: "",
         booking_type: "JOIN",
-        people_count: 1,
-        companion_names: [""],
+        people_count: 0,
+        companion_names: [],
         payment_amount: teeTime ? (teeTime.green_fee * 1).toString() : "",
         memo: "",
       })
@@ -308,13 +303,16 @@ export default function TeeTimeBookingsModal({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>
-            예약 관리 - {teeTime.course_name} ({teeTime.date} {teeTime.time})
-          </DialogTitle>
-          <p className="text-sm text-gray-500 mt-1">
-            선입금: {formatCurrency(teeTime.green_fee)} | 예약현황:{" "}
-            {teeTime.slots_booked}/{teeTime.slots_total}명
-          </p>
+          <DialogTitle>{teeTime.course_name}</DialogTitle>
+          <div className="text-m text-gray-800 mt-1 space-y-1">
+            {(teeTime as any).booker_name && (
+              <p>예약자명: {(teeTime as any).booker_name}</p>
+            )}
+            <div className="text-sm text-gray-500 mt-1 space-y-1">
+              선입금: {formatCurrency(teeTime.green_fee)} | 예약현황:{" "}
+              {teeTime.slots_booked}/{teeTime.slots_total}명
+            </div>
+          </div>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -475,134 +473,91 @@ export default function TeeTimeBookingsModal({
                 </div>
 
                 <div>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant={
-                        customerMode === "existing" ? "default" : "outline"
-                      }
-                      size="sm"
-                      onClick={() => setCustomerMode("existing")}
-                      className="flex-1"
-                    >
-                      기존 고객
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={customerMode === "new" ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setCustomerMode("new")}
-                      className="flex-1"
-                    >
-                      신규 고객
-                    </Button>
-                  </div>
-                </div>
-
-                {customerMode === "existing" ? (
-                  <div>
-                    <Label htmlFor="customer_id">고객 선택</Label>
-                    <Select
-                      value={formData.customer_id}
-                      onValueChange={handleCustomerChange}
-                    >
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="고객을 선택하세요" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {customers?.map((customer) => (
-                          <SelectItem key={customer.id} value={customer.id}>
-                            {customer.name} ({customer.phone})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                ) : (
-                  <>
-                    <div>
-                      <Label htmlFor="name">예약자명 (대표)</Label>
-                      <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) => {
-                          const newName = e.target.value
-                          const newCompanionNames = [
-                            ...formData.companion_names,
-                          ]
-                          newCompanionNames[0] = newName
-                          setFormData({
-                            ...formData,
-                            name: newName,
-                            companion_names: newCompanionNames,
-                          })
-                        }}
-                        placeholder="홍길동"
-                        required
-                        className="mt-1"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="phone">연락처</Label>
-                      <Input
-                        id="phone"
-                        value={formData.phone}
-                        onChange={(e) =>
-                          setFormData({ ...formData, phone: e.target.value })
-                        }
-                        placeholder="010-1234-5678"
-                        required
-                        className="mt-1"
-                      />
-                    </div>
-                  </>
-                )}
-
-                <div>
-                  <Label htmlFor="people_count">인원</Label>
+                  <Label htmlFor="customer_select">고객 선택</Label>
                   <Select
-                    value={formData.people_count.toString()}
-                    onValueChange={(value) =>
-                      handlePeopleCountChange(parseInt(value))
-                    }
-                    disabled={formData.booking_type === "TRANSFER"}
+                    value=""
+                    onValueChange={handleCustomerSelect}
                   >
                     <SelectTrigger className="mt-1">
-                      <SelectValue />
+                      <SelectValue placeholder="고객을 선택하세요 (추가)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="1">1명</SelectItem>
-                      <SelectItem value="2">2명</SelectItem>
-                      <SelectItem value="3">3명</SelectItem>
-                      <SelectItem value="4">4명</SelectItem>
+                      {customers?.map((customer) => (
+                        <SelectItem key={customer.id} value={customer.id}>
+                          {customer.name} ({customer.phone})
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
-                  {formData.booking_type === "TRANSFER" && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      양도는 전체 {teeTime?.slots_total}명으로 자동 설정됩니다
-                    </p>
-                  )}
+                  <p className="text-xs text-gray-500 mt-1">
+                    고객을 선택하면 목록에 추가됩니다
+                  </p>
                 </div>
 
                 <div>
-                  <Label>고객명 ({formData.people_count}명)</Label>
+                  <Label>고객명 목록 ({formData.people_count}명)</Label>
                   <div className="space-y-2 mt-1">
                     {formData.companion_names.map((name, index) => (
-                      <Input
-                        key={index}
-                        value={name}
-                        onChange={(e) =>
-                          handleCompanionNameChange(index, e.target.value)
-                        }
-                        placeholder={`${index + 1}번째 고객 이름`}
-                        required
-                      />
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          value={name}
+                          onChange={(e) =>
+                            handleCompanionNameChange(index, e.target.value)
+                          }
+                          placeholder={`${index + 1}번째 고객 이름`}
+                          required
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const newNames = formData.companion_names.filter((_, i) => i !== index)
+                            setFormData({
+                              ...formData,
+                              people_count: newNames.length,
+                              companion_names: newNames
+                            })
+                          }}
+                        >
+                          삭제
+                        </Button>
+                      </div>
                     ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const newNames = [...formData.companion_names, ""]
+                        setFormData({
+                          ...formData,
+                          people_count: newNames.length,
+                          companion_names: newNames
+                        })
+                      }}
+                      className="w-full"
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      고객 추가
+                    </Button>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">
                     모든 고객명을 입력해주세요. 골프장에 전달됩니다.
                   </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="phone">연락처 (선택)</Label>
+                  <Input
+                    id="phone"
+                    value={formData.phone}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
+                    placeholder="010-1234-5678"
+                    className="mt-1"
+                  />
                 </div>
 
                 <div>

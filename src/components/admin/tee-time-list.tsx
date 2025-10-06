@@ -88,6 +88,11 @@ export default function TeeTimeList({
                         </span>
                       )}
                     </div>
+                    {(teeTime as any).booker_name && (
+                      <div className="text-sm text-gray-700 mt-1">
+                        예약자: {(teeTime as any).booker_name}
+                      </div>
+                    )}
                     {teeTime.created_by && (
                       <div className="text-xs text-gray-500 mt-1">
                         생성자: {teeTime.created_by}
@@ -187,6 +192,11 @@ export default function TeeTimeList({
                     {teeTime.onsite_payment > 0 && (
                       <div className="text-sm text-gray-500 mt-0.5">
                         현장결제: {formatCurrency(teeTime.onsite_payment)}
+                      </div>
+                    )}
+                    {(teeTime as any).booker_name && (
+                      <div className="text-sm text-gray-700 mt-1">
+                        예약자: {(teeTime as any).booker_name}
                       </div>
                     )}
                     {teeTime.created_by && (

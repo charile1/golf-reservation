@@ -1,6 +1,5 @@
 'use client'
 
-import { Transaction } from '@/types/database'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -55,18 +54,6 @@ export default function TransactionList({ transactions, onEdit }: TransactionLis
     }
   }
 
-  const getRevenueTypeText = (type: string) => {
-    switch (type) {
-      case 'standard':
-        return '일반'
-      case 'package':
-        return '패키지'
-      case 'buyout':
-        return '선매입'
-      default:
-        return type
-    }
-  }
 
   if (transactions.length === 0) {
     return (
@@ -84,7 +71,7 @@ export default function TransactionList({ transactions, onEdit }: TransactionLis
             <TableRow>
               <TableHead className="whitespace-nowrap">플레이 일시</TableHead>
               <TableHead className="whitespace-nowrap">골프장</TableHead>
-              <TableHead className="whitespace-nowrap">타입</TableHead>
+              <TableHead className="whitespace-nowrap">예약자</TableHead>
               <TableHead className="whitespace-nowrap text-right">인원</TableHead>
               <TableHead className="whitespace-nowrap text-right">선입금</TableHead>
               <TableHead className="whitespace-nowrap text-right">현장결제</TableHead>
@@ -105,9 +92,7 @@ export default function TransactionList({ transactions, onEdit }: TransactionLis
                   {transaction.course_name}
                 </TableCell>
                 <TableCell className="whitespace-nowrap">
-                  <span className="text-xs px-2 py-1 rounded bg-gray-100">
-                    {getRevenueTypeText(transaction.revenue_type)}
-                  </span>
+                  {transaction.booking?.name || '-'}
                 </TableCell>
                 <TableCell className="text-right whitespace-nowrap">
                   {transaction.people_count}명

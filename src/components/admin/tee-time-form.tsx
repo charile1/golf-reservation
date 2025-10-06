@@ -41,6 +41,8 @@ export default function TeeTimeForm({
     date: string
     time: string
     course_name: string
+    course: string
+    booker_name: string
     green_fee: string
     onsite_payment: string
     slots_total: string
@@ -49,6 +51,8 @@ export default function TeeTimeForm({
     date: "",
     time: "",
     course_name: "오션비치리조트",
+    course: "OCEAN",
+    booker_name: "박광로",
     green_fee: "",
     onsite_payment: "",
     slots_total: "4",
@@ -61,6 +65,8 @@ export default function TeeTimeForm({
         date: teeTime.date,
         time: teeTime.time,
         course_name: teeTime.course_name,
+        course: (teeTime as any).course || "OCEAN",
+        booker_name: (teeTime as any).booker_name || "박광로",
         green_fee: teeTime.green_fee.toString(),
         onsite_payment: teeTime.onsite_payment?.toString() || "0",
         slots_total: teeTime.slots_total.toString(),
@@ -75,6 +81,8 @@ export default function TeeTimeForm({
         date: today,
         time: currentTime,
         course_name: "오션비치리조트",
+        course: "OCEAN",
+        booker_name: "박광로",
         green_fee: "",
         onsite_payment: "0",
         slots_total: "4",
@@ -89,6 +97,8 @@ export default function TeeTimeForm({
         date: data.date,
         time: data.time,
         course_name: data.course_name,
+        course: data.course,
+        booker_name: data.booker_name,
         green_fee: parseInt(data.green_fee),
         onsite_payment: parseInt(data.onsite_payment) || 0,
         slots_total: parseInt(data.slots_total),
@@ -208,6 +218,53 @@ export default function TeeTimeForm({
             </div>
           </div>
 
+          {/* 예약자명 & 코스 */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="booker_name">예약자명</Label>
+              <Select
+                value={formData.booker_name}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, booker_name: value })
+                }
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="박광로">박광로</SelectItem>
+                  <SelectItem value="윤미라">윤미라</SelectItem>
+                  <SelectItem value="박경서">박경서</SelectItem>
+                  <SelectItem value="박건빈">박건빈</SelectItem>
+                  <SelectItem value="윤태경">윤태경</SelectItem>
+                  <SelectItem value="박영기">박영기</SelectItem>
+                  <SelectItem value="백수예">백수예</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {formData.course_name === "오션비치리조트" && (
+              <div>
+                <Label htmlFor="course">코스</Label>
+                <Select
+                  value={formData.course}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, course: value })
+                  }
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="OCEAN">OCEAN</SelectItem>
+                    <SelectItem value="VALLEY">VALLEY</SelectItem>
+                    <SelectItem value="BEACH">BEACH</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
+
           {/* 날짜 & 시간 */}
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -284,6 +341,44 @@ export default function TeeTimeForm({
                 required
                 className="mt-1"
               />
+              <div className="flex gap-1 mt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 text-xs"
+                  onClick={() => {
+                    const current = parseInt(formData.green_fee) || 0
+                    setFormData({ ...formData, green_fee: (current + 10000).toString() })
+                  }}
+                >
+                  10,000
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 text-xs"
+                  onClick={() => {
+                    const current = parseInt(formData.green_fee) || 0
+                    setFormData({ ...formData, green_fee: (current + 15000).toString() })
+                  }}
+                >
+                  15,000
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 text-xs"
+                  onClick={() => {
+                    const current = parseInt(formData.green_fee) || 0
+                    setFormData({ ...formData, green_fee: (current + 20000).toString() })
+                  }}
+                >
+                  20,000
+                </Button>
+              </div>
             </div>
 
             <div>
@@ -298,6 +393,32 @@ export default function TeeTimeForm({
                 placeholder="0"
                 className="mt-1"
               />
+              <div className="flex gap-1 mt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 text-xs"
+                  onClick={() => {
+                    const current = parseInt(formData.onsite_payment) || 0
+                    setFormData({ ...formData, onsite_payment: (current + 92500).toString() })
+                  }}
+                >
+                  92,500
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 text-xs"
+                  onClick={() => {
+                    const current = parseInt(formData.onsite_payment) || 0
+                    setFormData({ ...formData, onsite_payment: (current + 102500).toString() })
+                  }}
+                >
+                  102,500
+                </Button>
+              </div>
             </div>
           </div>
 
