@@ -39,6 +39,9 @@ export default function CustomerList({
                 이메일
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                그룹
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 메모
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -64,6 +67,23 @@ export default function CustomerList({
                   <div className="text-sm text-gray-500">
                     {customer.email || '-'}
                   </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span
+                    className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                      customer.group_type === 'COUPLE'
+                        ? 'bg-pink-100 text-pink-800'
+                        : customer.group_type === 'SINGLE'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}
+                  >
+                    {customer.group_type === 'COUPLE'
+                      ? '부부'
+                      : customer.group_type === 'SINGLE'
+                      ? '1인 조인'
+                      : '미지정'}
+                  </span>
                 </td>
                 <td className="px-6 py-4">
                   <div className="text-sm text-gray-500 max-w-xs truncate">
@@ -122,6 +142,26 @@ export default function CustomerList({
                   <div className="font-medium">{customer.email}</div>
                 </div>
               )}
+
+              {/* 그룹 */}
+              <div className="text-sm">
+                <span className="text-gray-500">그룹: </span>
+                <span
+                  className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                    customer.group_type === 'COUPLE'
+                      ? 'bg-pink-100 text-pink-800'
+                      : customer.group_type === 'SINGLE'
+                      ? 'bg-blue-100 text-blue-800'
+                      : 'bg-gray-100 text-gray-800'
+                  }`}
+                >
+                  {customer.group_type === 'COUPLE'
+                    ? '부부'
+                    : customer.group_type === 'SINGLE'
+                    ? '1인 조인'
+                    : '미지정'}
+                </span>
+              </div>
 
               {/* 메모 */}
               {customer.memo && (

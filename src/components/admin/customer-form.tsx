@@ -12,8 +12,15 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { useToast } from '@/components/ui/use-toast'
-import type { Customer } from '@/types/database'
+import type { Customer, CustomerGroupType } from '@/types/database'
 
 interface CustomerFormProps {
   open: boolean
@@ -30,6 +37,7 @@ export default function CustomerForm({ open, onClose, customer }: CustomerFormPr
     name: '',
     phone: '',
     email: '',
+    group_type: 'NONE' as CustomerGroupType,
     memo: '',
   })
 
@@ -39,6 +47,7 @@ export default function CustomerForm({ open, onClose, customer }: CustomerFormPr
         name: customer.name,
         phone: customer.phone,
         email: customer.email || '',
+        group_type: customer.group_type,
         memo: customer.memo || '',
       })
     } else {
@@ -46,6 +55,7 @@ export default function CustomerForm({ open, onClose, customer }: CustomerFormPr
         name: '',
         phone: '',
         email: '',
+        group_type: 'NONE',
         memo: '',
       })
     }
@@ -57,6 +67,7 @@ export default function CustomerForm({ open, onClose, customer }: CustomerFormPr
         name: data.name,
         phone: data.phone,
         email: data.email || null,
+        group_type: data.group_type,
         memo: data.memo || null,
       }
 
@@ -136,6 +147,28 @@ export default function CustomerForm({ open, onClose, customer }: CustomerFormPr
               placeholder="example@email.com"
               className="mt-1"
             />
+          </div>
+
+          <div>
+            <Label htmlFor="group_type">그룹 타입</Label>
+            <Select
+              value={formData.group_type}
+              onValueChange={(value: CustomerGroupType) =>
+                setFormData({ ...formData, group_type: value })
+              }
+            >
+              <SelectTrigger className="mt-1">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="NONE">미지정</SelectItem>
+                <SelectItem value="COUPLE">부부</SelectItem>
+                <SelectItem value="SINGLE">1인 조인</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-gray-500 mt-1">
+              알림 발송 시 그룹별로 필터링할 수 있습니다
+            </p>
           </div>
 
           <div>

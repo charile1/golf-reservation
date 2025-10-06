@@ -1,12 +1,14 @@
 export type TeeTimeStatus = 'AVAILABLE' | 'JOINING' | 'CONFIRMED' | 'CANCELED'
 export type BookingStatus = 'PENDING' | 'CONFIRMED' | 'CANCELED'
 export type BookingType = 'TRANSFER' | 'JOIN'
+export type CustomerGroupType = 'NONE' | 'COUPLE' | 'SINGLE'
 
 export interface Customer {
   id: string
   name: string
   phone: string
   email: string | null
+  group_type: CustomerGroupType
   memo: string | null
   created_at: string
   updated_at: string

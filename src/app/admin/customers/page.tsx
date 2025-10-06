@@ -9,13 +9,14 @@ import { Plus } from 'lucide-react'
 import CustomerForm from '@/components/admin/customer-form'
 import CustomerList from '@/components/admin/customer-list'
 import AdminNav from '@/components/admin/admin-nav'
-import type { Customer } from '@/types/database'
+import type { Customer, CustomerGroupType } from '@/types/database'
 import { useRouter } from 'next/navigation'
 
 export default function CustomersPage() {
   const router = useRouter()
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
+  const [groupFilter, setGroupFilter] = useState<'ALL' | CustomerGroupType>('ALL')
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const supabase = createClient()
@@ -87,15 +88,52 @@ export default function CustomersPage() {
       <AdminNav />
       <div className="container mx-auto py-6 px-4">
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">고객 관리</h1>
               <p className="text-gray-600 mt-1">고객 정보를 등록하고 관리하세요</p>
             </div>
-            <Button onClick={() => setIsFormOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              고객 등록
-            </Button>
+            <div className="flex gap-2 w-full sm:w-auto">
+              {/* 그룹 필터 */}
+              <div className="flex border rounded-md overflow-hidden flex-1 sm:flex-none">
+                <Button
+                  onClick={() => setGroupFilter('ALL')}
+                  variant={groupFilter === 'ALL' ? 'default' : 'ghost'}
+                  size="sm"
+                  className="rounded-none text-xs sm:text-sm"
+                >
+                  전체
+                </Button>
+                <Button
+                  onClick={() => setGroupFilter('COUPLE')}
+                  variant={groupFilter === 'COUPLE' ? 'default' : 'ghost'}
+                  size="sm"
+                  className="rounded-none text-xs sm:text-sm"
+                >
+                  부부
+                </Button>
+                <Button
+                  onClick={() => setGroupFilter('SINGLE')}
+                  variant={groupFilter === 'SINGLE' ? 'default' : 'ghost'}
+                  size="sm"
+                  className="rounded-none text-xs sm:text-sm"
+                >
+                  1인 조인
+                </Button>
+                <Button
+                  onClick={() => setGroupFilter('NONE')}
+                  variant={groupFilter === 'NONE' ? 'default' : 'ghost'}
+                  size="sm"
+                  className="rounded-none text-xs sm:text-sm"
+                >
+                  미지정
+                </Button>
+              </div>
+              <Button onClick={() => setIsFormOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                고객 등록
+              </Button>
+            </div>
           </div>
 
           {isLoading ? (
@@ -104,7 +142,11 @@ export default function CustomersPage() {
             </div>
           ) : (
             <CustomerList
-              customers={customers || []}
+              customers={
+                groupFilter === 'ALL'
+                  ? customers || []
+                  : (customers || []).filter(c => c.group_type === groupFilter)
+              }
               onEdit={handleEdit}
               onDelete={handleDelete}
             />
