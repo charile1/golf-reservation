@@ -106,12 +106,28 @@ export default function TeeTimeForm({
         const {
           data: { user },
         } = await supabase.auth.getUser()
-        const nickname =
-          user?.user_metadata?.name || user?.email?.split("@")[0] || null
+
+        let userName = null
+        if (user?.id) {
+          // admin_user 테이블에서 이름 조회
+          const { data: adminUser } = await supabase
+            .from("admin_user")
+            .select("name")
+            .eq("id", user.id)
+            .single()
+
+          if (adminUser?.name) {
+            userName = adminUser.name
+          } else {
+            // 없으면 이메일 사용
+            userName = user.email?.split("@")[0] || null
+          }
+        }
+
         const { error } = await supabase.from("tee_time").insert([
           {
             ...payload,
-            created_by: nickname,
+            created_by: userName,
           },
         ])
         if (error) throw error
