@@ -47,11 +47,11 @@ export default function BookingsPage() {
 
       if (error) throw error
 
-      // 티타임 날짜와 시간 기준으로 정렬
+      // 티타임 날짜와 시간 기준으로 정렬 (최근 날짜가 위로)
       const sorted = (data as unknown as BookingWithTeeTime[]).sort((a, b) => {
-        const dateCompare = a.tee_time.date.localeCompare(b.tee_time.date)
+        const dateCompare = b.tee_time.date.localeCompare(a.tee_time.date)  // 내림차순
         if (dateCompare !== 0) return dateCompare
-        return a.tee_time.time.localeCompare(b.tee_time.time)
+        return b.tee_time.time.localeCompare(a.tee_time.time)  // 내림차순
       })
 
       return sorted
