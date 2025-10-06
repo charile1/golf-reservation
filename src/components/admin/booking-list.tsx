@@ -18,7 +18,7 @@ const statusColors = {
 
 const statusLabels = {
   PENDING: "입금대기",
-  CONFIRMED: "마감",
+  CONFIRMED: "입금 확정",
   CANCELED: "취소",
 }
 
