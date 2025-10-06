@@ -44,6 +44,8 @@ export default function TeeTimeForm({
     green_fee: string
     onsite_payment: string
     slots_total: string
+    revenue_type: "standard" | "package" | "buyout"
+    cost_price: string
     status: "AVAILABLE" | "JOINING" | "CONFIRMED" | "CANCELED"
   }>({
     date: "",
@@ -52,6 +54,8 @@ export default function TeeTimeForm({
     green_fee: "",
     onsite_payment: "",
     slots_total: "4",
+    revenue_type: "standard",
+    cost_price: "0",
     status: "AVAILABLE",
   })
 
@@ -64,6 +68,8 @@ export default function TeeTimeForm({
         green_fee: teeTime.green_fee.toString(),
         onsite_payment: teeTime.onsite_payment?.toString() || "0",
         slots_total: teeTime.slots_total.toString(),
+        revenue_type: teeTime.revenue_type,
+        cost_price: teeTime.cost_price?.toString() || "0",
         status: teeTime.status,
       })
     } else {
@@ -78,6 +84,8 @@ export default function TeeTimeForm({
         green_fee: "",
         onsite_payment: "0",
         slots_total: "4",
+        revenue_type: "standard",
+        cost_price: "0",
         status: "AVAILABLE",
       })
     }
@@ -92,6 +100,8 @@ export default function TeeTimeForm({
         green_fee: parseInt(data.green_fee),
         onsite_payment: parseInt(data.onsite_payment) || 0,
         slots_total: parseInt(data.slots_total),
+        revenue_type: data.revenue_type,
+        cost_price: parseInt(data.cost_price) || 0,
         status: data.status,
       }
 
@@ -256,6 +266,49 @@ export default function TeeTimeForm({
             <p className="text-xs text-gray-500 mt-1">
               카트비, 캐디피 등 고객이 현장에서 결제할 금액을 입력하세요
               (선택사항)
+            </p>
+          </div>
+
+          <div>
+            <Label htmlFor="revenue_type">수익 모델</Label>
+            <Select
+              value={formData.revenue_type}
+              onValueChange={(value: "standard" | "package" | "buyout") =>
+                setFormData({ ...formData, revenue_type: value })
+              }
+            >
+              <SelectTrigger className="mt-1">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="standard">일반 (선입금이 마진)</SelectItem>
+                <SelectItem value="package">패키지 (차액 마진)</SelectItem>
+                <SelectItem value="buyout">선매입 (총액-원가)</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-gray-500 mt-1">
+              수익 계산 방식을 선택하세요
+            </p>
+          </div>
+
+          <div>
+            <Label htmlFor="cost_price">원가 (원)</Label>
+            <Input
+              id="cost_price"
+              type="number"
+              value={formData.cost_price}
+              onChange={(e) =>
+                setFormData({ ...formData, cost_price: e.target.value })
+              }
+              placeholder="0"
+              className="mt-1"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              {formData.revenue_type === "standard"
+                ? "일반 모델은 원가가 0입니다"
+                : formData.revenue_type === "package"
+                ? "패키지 원가 (숙박, 식사, 그린피 등)"
+                : "선매입 원가 (티타임 매입가)"}
             </p>
           </div>
 
