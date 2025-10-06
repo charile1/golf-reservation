@@ -12,8 +12,8 @@ import {
 } from '@/components/ui/table'
 
 interface TransactionListProps {
-  transactions: Transaction[]
-  onEdit: (transaction: Transaction) => void
+  transactions: any[]
+  onEdit: (transaction: any) => void
 }
 
 export default function TransactionList({ transactions, onEdit }: TransactionListProps) {
@@ -82,7 +82,7 @@ export default function TransactionList({ transactions, onEdit }: TransactionLis
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="whitespace-nowrap">플레이 날짜</TableHead>
+              <TableHead className="whitespace-nowrap">플레이 일시</TableHead>
               <TableHead className="whitespace-nowrap">골프장</TableHead>
               <TableHead className="whitespace-nowrap">타입</TableHead>
               <TableHead className="whitespace-nowrap text-right">인원</TableHead>
@@ -96,7 +96,10 @@ export default function TransactionList({ transactions, onEdit }: TransactionLis
             {transactions.map((transaction) => (
               <TableRow key={transaction.id}>
                 <TableCell className="whitespace-nowrap">
-                  {formatDate(transaction.play_date)}
+                  <div>{formatDate(transaction.play_date)}</div>
+                  {transaction.tee_time?.time && (
+                    <div className="text-xs text-gray-500">{transaction.tee_time.time}</div>
+                  )}
                 </TableCell>
                 <TableCell className="whitespace-nowrap">
                   {transaction.course_name}

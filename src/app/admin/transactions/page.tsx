@@ -31,18 +31,23 @@ export default function TransactionsPage() {
     checkAuth()
   }, [router, supabase])
 
-  // Fetch transactions
+  // Fetch transactions with tee_time info
   const { data: transactions, isLoading } = useQuery({
     queryKey: ['transactions'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('transaction')
-        .select('*')
+        .select(`
+          *,
+          tee_time:tee_time_id (
+            time
+          )
+        `)
         .order('play_date', { ascending: false })
         .order('created_at', { ascending: false })
 
       if (error) throw error
-      return data as Transaction[]
+      return data as any[]
     },
   })
 
