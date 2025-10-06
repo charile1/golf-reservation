@@ -64,25 +64,36 @@ export default function SmsSendModal({
     setIsSending(true)
 
     try {
-      // TODO: SMS 발송 API 호출
-      // 실제 SMS 발송 로직은 백엔드 API를 통해 구현해야 합니다
-      // 예: await fetch('/api/sms/send', { method: 'POST', body: JSON.stringify({ customers, message }) })
+      // Solapi API를 통한 SMS 발송
+      const response = await fetch('/api/sms/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          recipients: customers.map(c => ({ name: c.name, phone: c.phone })),
+          message: message.trim(),
+        }),
+      })
 
-      // 임시: 시뮬레이션
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || '문자 발송에 실패했습니다')
+      }
 
       toast({
         title: '문자 발송 완료',
-        description: `${customers.length}명에게 문자를 발송했습니다.`,
+        description: `${data.sentCount}명에게 문자를 발송했습니다.`,
       })
 
       setMessage('')
       onClose()
-    } catch (error) {
+    } catch (error: any) {
       console.error('SMS 발송 실패:', error)
       toast({
         title: '문자 발송 실패',
-        description: '다시 시도해주세요',
+        description: error.message || '다시 시도해주세요',
         variant: 'destructive',
       })
     } finally {
@@ -153,7 +164,7 @@ export default function SmsSendModal({
               className="resize-none"
             />
             <p className="text-xs text-gray-500 mt-2">
-              * 실제 SMS 발송을 위해서는 문자 발송 서비스(예: 알리고, 카카오 알림톡 등)와 연동이 필요합니다.
+              * 알리고를 통해 실제 SMS가 발송됩니다. (건당 요금 발생)
             </p>
           </div>
         </div>
