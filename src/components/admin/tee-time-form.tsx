@@ -96,9 +96,10 @@ export default function TeeTimeForm({ open, onClose, teeTime }: TeeTimeFormProps
       } else {
         // 생성자 정보 가져오기
         const { data: { user } } = await supabase.auth.getUser()
+        const nickname = user?.user_metadata?.name || user?.email?.split('@')[0] || null
         const { error } = await supabase.from('tee_time').insert([{
           ...payload,
-          created_by: user?.email || null
+          created_by: nickname
         }])
         if (error) throw error
       }
