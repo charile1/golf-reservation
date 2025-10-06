@@ -63,9 +63,13 @@ export default function TeeTimeForm({ open, onClose, teeTime }: TeeTimeFormProps
         status: teeTime.status,
       })
     } else {
+      const now = new Date()
+      const today = now.toISOString().split('T')[0]
+      const currentTime = now.toTimeString().slice(0, 5)
+
       setFormData({
-        date: '',
-        time: '',
+        date: today,
+        time: currentTime,
         course_name: '오션비치리조트',
         green_fee: '',
         onsite_payment: '0',
