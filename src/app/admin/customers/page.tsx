@@ -5,9 +5,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/use-toast'
-import { Plus } from 'lucide-react'
+import { Plus, MessageSquare } from 'lucide-react'
 import CustomerForm from '@/components/admin/customer-form'
 import CustomerList from '@/components/admin/customer-list'
+import SmsSendModal from '@/components/admin/sms-send-modal'
 import AdminNav from '@/components/admin/admin-nav'
 import type { Customer, CustomerGroupType } from '@/types/database'
 import { useRouter } from 'next/navigation'
@@ -15,6 +16,7 @@ import { useRouter } from 'next/navigation'
 export default function CustomersPage() {
   const router = useRouter()
   const [isFormOpen, setIsFormOpen] = useState(false)
+  const [isSmsModalOpen, setIsSmsModalOpen] = useState(false)
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
   const [groupFilter, setGroupFilter] = useState<'ALL' | CustomerGroupType>('ALL')
   const { toast } = useToast()
@@ -130,6 +132,14 @@ export default function CustomersPage() {
                   미지정
                 </Button>
               </div>
+              <Button
+                onClick={() => setIsSmsModalOpen(true)}
+                variant="outline"
+                disabled={groupFilter === 'ALL'}
+              >
+                <MessageSquare className="h-4 w-4 mr-2" />
+                단체 문자
+              </Button>
               <Button onClick={() => setIsFormOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 고객 등록
@@ -157,6 +167,17 @@ export default function CustomersPage() {
             open={isFormOpen}
             onClose={handleFormClose}
             customer={editingCustomer}
+          />
+
+          <SmsSendModal
+            open={isSmsModalOpen}
+            onClose={() => setIsSmsModalOpen(false)}
+            customers={
+              groupFilter === 'ALL'
+                ? []
+                : (customers || []).filter(c => c.group_type === groupFilter)
+            }
+            groupType={groupFilter}
           />
           </div>
         </div>
