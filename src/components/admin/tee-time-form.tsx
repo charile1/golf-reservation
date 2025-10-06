@@ -211,7 +211,7 @@ export default function TeeTimeForm({
                 <SelectContent>
                   <SelectItem value="AVAILABLE">예약 대기</SelectItem>
                   <SelectItem value="JOINING">조인 모집 중</SelectItem>
-                  <SelectItem value="CONFIRMED">예약 확정</SelectItem>
+                  <SelectItem value="CONFIRMED">마감</SelectItem>
                   <SelectItem value="CANCELED">취소</SelectItem>
                 </SelectContent>
               </Select>

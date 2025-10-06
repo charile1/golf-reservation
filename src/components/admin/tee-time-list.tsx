@@ -20,7 +20,7 @@ const statusColors = {
 const statusLabels = {
   AVAILABLE: "예약 대기",
   JOINING: "조인 모집 중",
-  CONFIRMED: "예약 확정",
+  CONFIRMED: "마감",
   CANCELED: "취소",
 }
 
@@ -234,7 +234,7 @@ export default function TeeTimeList({
                   {/* 작업 버튼 */}
                   <div className="flex gap-2 pt-2 border-t">
                     <Button
-                      variant="outline"
+                      variant="default"
                       size="sm"
                       onClick={() => onManageBookings(teeTime)}
                       className="flex-1"

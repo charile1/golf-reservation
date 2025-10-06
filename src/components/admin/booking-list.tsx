@@ -18,7 +18,7 @@ const statusColors = {
 
 const statusLabels = {
   PENDING: "입금대기",
-  CONFIRMED: "확정",
+  CONFIRMED: "마감",
   CANCELED: "취소",
 }
 
@@ -66,7 +66,7 @@ export default function BookingList({
                     티타임
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    예약자
+                    예약자명
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     연락처
@@ -200,7 +200,7 @@ export default function BookingList({
                   {/* 예약자 정보 */}
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div>
-                      <span className="text-gray-500">예약자:</span>
+                      <span className="text-gray-500">예약자명:</span>
                       <div className="font-medium">{booking.name}</div>
                     </div>
                     <div>
@@ -209,12 +209,6 @@ export default function BookingList({
                         {booking.people_count}명
                       </div>
                     </div>
-                  </div>
-
-                  {/* 연락처 */}
-                  <div className="text-sm">
-                    <span className="text-gray-500">연락처:</span>
-                    <div className="font-medium">{booking.phone}</div>
                   </div>
 
                   {/* 고객명 */}
@@ -227,6 +221,12 @@ export default function BookingList({
                         </div>
                       </div>
                     )}
+
+                  {/* 연락처 */}
+                  <div className="text-sm">
+                    <span className="text-gray-500">연락처:</span>
+                    <div className="font-medium">{booking.phone}</div>
+                  </div>
 
                   {/* 상태 */}
                   <div className="flex items-center justify-between">
