@@ -25,9 +25,9 @@ SELECT
     b.id AS booking_id,
     b.tee_time_id,
     t.course_name,
-    (t.green_fee * b.people_count) AS total_price,
+    t.green_fee AS total_price,  -- 티타임의 선입금 총액
     b.payment_amount AS prepayment,  -- 실제 받은 선입금 (가장 중요)
-    (t.onsite_payment * b.people_count) AS onsite_payment,
+    t.onsite_payment AS onsite_payment,  -- 현장결제 총액 (이미 총액)
     0 AS cost,  -- 원가는 중요하지 않음
     0 AS commission,  -- 마진도 중요하지 않음
     COALESCE(t.revenue_type, 'standard') AS revenue_type,

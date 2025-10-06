@@ -44,17 +44,8 @@ export async function createTransaction(
 
   const teeTime = booking.tee_time as any
 
-  // 2. 수익 계산
-  const { commission, commissionPerPerson } = calculateCommission(
-    teeTime.revenue_type,
-    booking.payment_amount,
-    teeTime.onsite_payment,
-    teeTime.cost_price,
-    booking.people_count
-  )
-
-  const totalPrice =
-    booking.payment_amount + teeTime.onsite_payment * booking.people_count
+  // 2. 금액 계산 - 티타임 금액은 이미 총액
+  const totalPrice = teeTime.green_fee  // 티타임의 선입금 총액
 
   // 3. transaction 생성
   const transactionData = {
@@ -65,7 +56,7 @@ export async function createTransaction(
     // 금액 정보 - 선입금이 가장 중요
     total_price: totalPrice,
     prepayment: booking.payment_amount,  // 실제 받은 선입금 (가장 중요)
-    onsite_payment: teeTime.onsite_payment * booking.people_count,  // 총 현장결제 금액
+    onsite_payment: teeTime.onsite_payment,  // 현장결제 총액
     cost: 0,  // 원가는 중요하지 않음
     commission: 0,  // 마진도 중요하지 않음
 
