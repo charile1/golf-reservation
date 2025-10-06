@@ -118,8 +118,6 @@ export default function TransactionEditModal({
     }
   }
 
-  const commission = transaction.total_price - formData.cost
-
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
