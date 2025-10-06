@@ -1,7 +1,7 @@
-import { Edit, Trash2, CheckCircle } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { formatDate, formatDateTime, formatDateWithDay } from '@/lib/utils'
-import type { BookingWithTeeTime } from '@/types/database'
+import { Edit, Trash2, CheckCircle } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { formatDate, formatDateTime, formatDateWithDay } from "@/lib/utils"
+import type { BookingWithTeeTime } from "@/types/database"
 
 interface BookingListProps {
   bookings: BookingWithTeeTime[]
@@ -11,15 +11,15 @@ interface BookingListProps {
 }
 
 const statusColors = {
-  PENDING: 'bg-yellow-100 text-yellow-800',
-  CONFIRMED: 'bg-green-100 text-green-800',
-  CANCELED: 'bg-red-100 text-red-800',
+  PENDING: "bg-yellow-100 text-yellow-800",
+  CONFIRMED: "bg-green-100 text-green-800",
+  CANCELED: "bg-red-100 text-red-800",
 }
 
 const statusLabels = {
-  PENDING: '입금대기',
-  CONFIRMED: '확정',
-  CANCELED: '취소',
+  PENDING: "입금대기",
+  CONFIRMED: "확정",
+  CANCELED: "취소",
 }
 
 export default function BookingList({
@@ -60,121 +60,127 @@ export default function BookingList({
           {/* 데스크톱 테이블 뷰 */}
           <div className="hidden md:block overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                티타임
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                예약자
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                연락처
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                인원
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                고객명
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                상태
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                입금 받을 금액
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                메모
-              </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                작업
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {dateBookings.map((booking) => (
-              <tr key={booking.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">
-                    {booking.tee_time.course_name}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {formatDate(booking.tee_time.date)} {booking.tee_time.time}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{booking.name}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{booking.phone}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">
-                    {booking.people_count}명
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="text-sm text-gray-900">
-                    {booking.companion_names && booking.companion_names.length > 0
-                      ? booking.companion_names.join(', ')
-                      : '-'}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      statusColors[booking.status]
-                    }`}
-                  >
-                    {statusLabels[booking.status]}
-                  </span>
-                  {booking.paid_at && (
-                    <div className="text-xs text-gray-500 mt-1">
-                      {formatDateTime(booking.paid_at)}
-                    </div>
-                  )}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">
-                    {booking.payment_amount?.toLocaleString() || 0}원
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="text-sm text-gray-500 max-w-xs truncate">
-                    {booking.memo || '-'}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                  {booking.status === 'PENDING' && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onConfirmPayment(booking.id)}
-                      className="text-green-600 hover:text-green-700"
-                    >
-                      <CheckCircle className="h-4 w-4" />
-                    </Button>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onEdit(booking)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onDelete(booking.id)}
-                  >
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    티타임
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    예약자
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    연락처
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    인원
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    고객명
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    상태
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    선입금 금액
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    메모
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    작업
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {dateBookings.map((booking) => (
+                  <tr key={booking.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {booking.tee_time.course_name}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {formatDate(booking.tee_time.date)}{" "}
+                        {booking.tee_time.time}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {booking.name}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {booking.phone}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {booking.people_count}명
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900">
+                        {booking.companion_names &&
+                        booking.companion_names.length > 0
+                          ? booking.companion_names.join(", ")
+                          : "-"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          statusColors[booking.status]
+                        }`}
+                      >
+                        {statusLabels[booking.status]}
+                      </span>
+                      {booking.paid_at && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          {/* {formatDateTime(booking.paid_at)} */}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {booking.payment_amount?.toLocaleString() || 0}원
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-500 max-w-xs truncate">
+                        {booking.memo || "-"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                      {booking.status === "PENDING" && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onConfirmPayment(booking.id)}
+                          className="text-green-600 hover:text-green-700"
+                        >
+                          <CheckCircle className="h-4 w-4" />
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onEdit(booking)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onDelete(booking.id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
           {/* 모바일 카드 뷰 */}
           <div className="md:hidden divide-y divide-gray-200">
@@ -199,7 +205,9 @@ export default function BookingList({
                     </div>
                     <div>
                       <span className="text-gray-500">인원:</span>
-                      <div className="font-medium">{booking.people_count}명</div>
+                      <div className="font-medium">
+                        {booking.people_count}명
+                      </div>
                     </div>
                   </div>
 
@@ -210,14 +218,15 @@ export default function BookingList({
                   </div>
 
                   {/* 고객명 */}
-                  {booking.companion_names && booking.companion_names.length > 0 && (
-                    <div className="text-sm">
-                      <span className="text-gray-500">고객명:</span>
-                      <div className="font-medium">
-                        {booking.companion_names.join(', ')}
+                  {booking.companion_names &&
+                    booking.companion_names.length > 0 && (
+                      <div className="text-sm">
+                        <span className="text-gray-500">고객명:</span>
+                        <div className="font-medium">
+                          {booking.companion_names.join(", ")}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
                   {/* 상태 */}
                   <div className="flex items-center justify-between">
@@ -235,9 +244,9 @@ export default function BookingList({
                     )}
                   </div>
 
-                  {/* 입금 받을 금액 */}
+                  {/* 선입금 금액 */}
                   <div className="text-sm">
-                    <span className="text-gray-500">입금 받을 금액: </span>
+                    <span className="text-gray-500">선입금 금액: </span>
                     <span className="font-medium">
                       {booking.payment_amount?.toLocaleString() || 0}원
                     </span>
@@ -245,14 +254,12 @@ export default function BookingList({
 
                   {/* 메모 */}
                   {booking.memo && (
-                    <div className="text-sm text-gray-500">
-                      {booking.memo}
-                    </div>
+                    <div className="text-sm text-gray-500">{booking.memo}</div>
                   )}
 
                   {/* 작업 버튼 */}
                   <div className="flex justify-end gap-2 pt-2 border-t">
-                    {booking.status === 'PENDING' && (
+                    {booking.status === "PENDING" && (
                       <Button
                         variant="outline"
                         size="sm"

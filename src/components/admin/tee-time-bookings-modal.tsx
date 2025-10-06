@@ -312,7 +312,7 @@ export default function TeeTimeBookingsModal({
             예약 관리 - {teeTime.course_name} ({teeTime.date} {teeTime.time})
           </DialogTitle>
           <p className="text-sm text-gray-500 mt-1">
-            그린피: {formatCurrency(teeTime.green_fee)} | 예약현황:{" "}
+            선입금: {formatCurrency(teeTime.green_fee)} | 예약현황:{" "}
             {teeTime.slots_booked}/{teeTime.slots_total}명
           </p>
         </DialogHeader>
@@ -378,7 +378,7 @@ export default function TeeTimeBookingsModal({
                         {booking.phone} | {booking.people_count}명
                       </div>
                       <div className="text-sm font-semibold text-blue-700 mt-1">
-                        입금 금액: {formatCurrency(booking.payment_amount)}
+                        선입금 금액: {formatCurrency(booking.payment_amount)}
                       </div>
                       {booking.companion_names &&
                         booking.companion_names.length > 0 && (
@@ -606,7 +606,7 @@ export default function TeeTimeBookingsModal({
                 </div>
 
                 <div>
-                  <Label htmlFor="payment_amount">입금 금액 (원)</Label>
+                  <Label htmlFor="payment_amount">선입금 금액 (원)</Label>
                   <Input
                     id="payment_amount"
                     type="number"

@@ -1,7 +1,7 @@
-import { Edit, Trash2, UserPlus } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { formatDateWithDay, formatCurrency } from '@/lib/utils'
-import type { TeeTime } from '@/types/database'
+import { Edit, Trash2, UserPlus } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { formatDateWithDay, formatCurrency } from "@/lib/utils"
+import type { TeeTime } from "@/types/database"
 
 interface TeeTimeListProps {
   teeTimes: (TeeTime & { slots_pending?: number })[]
@@ -11,17 +11,17 @@ interface TeeTimeListProps {
 }
 
 const statusColors = {
-  AVAILABLE: 'bg-gray-100 text-gray-800',
-  JOINING: 'bg-orange-100 text-orange-800',
-  CONFIRMED: 'bg-green-100 text-green-800',
-  CANCELED: 'bg-red-100 text-red-800',
+  AVAILABLE: "bg-gray-100 text-gray-800",
+  JOINING: "bg-orange-100 text-orange-800",
+  CONFIRMED: "bg-green-100 text-green-800",
+  CANCELED: "bg-red-100 text-red-800",
 }
 
 const statusLabels = {
-  AVAILABLE: '등록',
-  JOINING: '조인모집',
-  CONFIRMED: '확정',
-  CANCELED: '취소',
+  AVAILABLE: "예약 대기",
+  JOINING: "조인 모집 중",
+  CONFIRMED: "예약 확정",
+  CANCELED: "취소",
 }
 
 export default function TeeTimeList({
@@ -81,7 +81,7 @@ export default function TeeTimeList({
                       {teeTime.course_name}
                     </div>
                     <div className="text-sm text-gray-600 mt-1">
-                      그린피: {formatCurrency(teeTime.green_fee)}
+                      선입금: {formatCurrency(teeTime.green_fee)}
                       {teeTime.onsite_payment > 0 && (
                         <span className="ml-2 text-gray-500">
                           | 현장결제: {formatCurrency(teeTime.onsite_payment)}
@@ -182,7 +182,7 @@ export default function TeeTimeList({
                       {teeTime.course_name}
                     </div>
                     <div className="text-sm text-gray-600 mt-1">
-                      그린피: {formatCurrency(teeTime.green_fee)}
+                      선입금: {formatCurrency(teeTime.green_fee)}
                     </div>
                     {teeTime.onsite_payment > 0 && (
                       <div className="text-sm text-gray-500 mt-0.5">

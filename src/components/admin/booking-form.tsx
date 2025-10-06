@@ -375,7 +375,7 @@ export default function BookingForm({
           </div>
 
           <div>
-            <Label htmlFor="payment_amount">입금 금액 (원)</Label>
+            <Label htmlFor="payment_amount">선입금 금액 (원)</Label>
             <Input
               id="payment_amount"
               type="number"
