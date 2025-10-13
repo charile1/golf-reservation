@@ -102,8 +102,8 @@ export default function TeeTimeForm({
         green_fee: parseInt(data.green_fee),
         onsite_payment: parseInt(data.onsite_payment) || 0,
         slots_total: parseInt(data.slots_total),
-        revenue_type: 'standard',  // 기본값으로 설정
-        cost_price: 0,  // 기본값 0
+        revenue_type: "standard", // 기본값으로 설정
+        cost_price: 0, // 기본값 0
         status: data.status,
       }
 
@@ -145,13 +145,20 @@ export default function TeeTimeForm({
         if (error) throw error
       }
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["teeTimes"] })
+
+      const dateStr = new Date(variables.date).toLocaleDateString('ko-KR', {
+        month: 'long',
+        day: 'numeric',
+        weekday: 'short'
+      })
+
       toast({
         title: teeTime ? "수정 완료" : "등록 완료",
         description: teeTime
-          ? "티타임이 수정되었습니다."
-          : "티타임이 등록되었습니다.",
+          ? `${dateStr} ${variables.time} ${variables.course_name} 티타임이 수정되었습니다.`
+          : `${dateStr} ${variables.time} ${variables.course_name} ${variables.booker_name} 티타임이 등록되었습니다.`,
       })
       onClose()
     },
@@ -222,45 +229,57 @@ export default function TeeTimeForm({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label htmlFor="booker_name">예약자명</Label>
-              <Select
+              <Input
+                id="booker_name"
                 value={formData.booker_name}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, booker_name: value })
+                onChange={(e) =>
+                  setFormData({ ...formData, booker_name: e.target.value })
                 }
-              >
-                <SelectTrigger className="mt-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="박광로">박광로</SelectItem>
-                  <SelectItem value="윤미라">윤미라</SelectItem>
-                  <SelectItem value="박경서">박경서</SelectItem>
-                  <SelectItem value="박건빈">박건빈</SelectItem>
-                  <SelectItem value="윤태경">윤태경</SelectItem>
-                  <SelectItem value="박영기">박영기</SelectItem>
-                  <SelectItem value="백수예">백수예</SelectItem>
-                </SelectContent>
-              </Select>
+                placeholder="예약자명 입력"
+                className="mt-1"
+              />
+              <div className="flex flex-wrap gap-1 mt-2">
+                {['박광로', '윤미라', '박경서', '박건빈', '윤태경', '박영기', '백수예', '김도엽', '서인애', '김종원', '이정수', '장진선', '박병하'].map((name) => (
+                  <Button
+                    key={name}
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="text-xs px-2 py-1 h-auto"
+                    onClick={() => setFormData({ ...formData, booker_name: name })}
+                  >
+                    {name}
+                  </Button>
+                ))}
+              </div>
             </div>
 
             {formData.course_name === "오션비치리조트" && (
               <div>
                 <Label htmlFor="course">코스</Label>
-                <Select
+                <Input
+                  id="course"
                   value={formData.course}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, course: value })
+                  onChange={(e) =>
+                    setFormData({ ...formData, course: e.target.value })
                   }
-                >
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="OCEAN">OCEAN</SelectItem>
-                    <SelectItem value="VALLEY">VALLEY</SelectItem>
-                    <SelectItem value="BEACH">BEACH</SelectItem>
-                  </SelectContent>
-                </Select>
+                  placeholder="코스 입력"
+                  className="mt-1"
+                />
+                <div className="flex gap-1 mt-2">
+                  {['OCEAN', 'VALLEY', 'BEACH'].map((course) => (
+                    <Button
+                      key={course}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="text-xs px-2 py-1 h-auto flex-1"
+                      onClick={() => setFormData({ ...formData, course })}
+                    >
+                      {course}
+                    </Button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -281,27 +300,64 @@ export default function TeeTimeForm({
               />
               {formData.date && (
                 <p className="text-xs text-gray-500 mt-1">
-                  {new Date(formData.date + 'T00:00:00').toLocaleDateString('ko-KR', {
-                    weekday: 'short',
-                    month: 'numeric',
-                    day: 'numeric'
-                  })}
+                  {new Date(formData.date + "T00:00:00").toLocaleDateString(
+                    "ko-KR",
+                    {
+                      weekday: "short",
+                      month: "numeric",
+                      day: "numeric",
+                    }
+                  )}
                 </p>
               )}
             </div>
 
             <div>
               <Label htmlFor="time">시간</Label>
-              <Input
-                id="time"
-                type="time"
-                value={formData.time}
-                onChange={(e) =>
-                  setFormData({ ...formData, time: e.target.value })
-                }
-                required
-                className="mt-1"
-              />
+              <div className="flex gap-2 mt-1">
+                <Select
+                  value={formData.time.split(':')[0] || '06'}
+                  onValueChange={(hour) => {
+                    const minute = formData.time.split(':')[1] || '00'
+                    setFormData({ ...formData, time: `${hour}:${minute}` })
+                  }}
+                >
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="시" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 24 }, (_, i) => {
+                      const hour = i.toString().padStart(2, '0')
+                      return (
+                        <SelectItem key={hour} value={hour}>
+                          {hour}시
+                        </SelectItem>
+                      )
+                    })}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={formData.time.split(':')[1] || '00'}
+                  onValueChange={(minute) => {
+                    const hour = formData.time.split(':')[0] || '06'
+                    setFormData({ ...formData, time: `${hour}:${minute}` })
+                  }}
+                >
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="분" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-60">
+                    {Array.from({ length: 60 }, (_, i) => {
+                      const minute = i.toString().padStart(2, '0')
+                      return (
+                        <SelectItem key={minute} value={minute}>
+                          {minute}분
+                        </SelectItem>
+                      )
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 
@@ -327,7 +383,7 @@ export default function TeeTimeForm({
           </div>
 
           {/* 선입금 & 현장결제 */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-3">
             <div>
               <Label htmlFor="green_fee">선입금 (원)</Label>
               <Input
@@ -349,7 +405,10 @@ export default function TeeTimeForm({
                   className="flex-1 text-xs"
                   onClick={() => {
                     const current = parseInt(formData.green_fee) || 0
-                    setFormData({ ...formData, green_fee: (current + 10000).toString() })
+                    setFormData({
+                      ...formData,
+                      green_fee: (current + 10000).toString(),
+                    })
                   }}
                 >
                   10,000
@@ -361,7 +420,10 @@ export default function TeeTimeForm({
                   className="flex-1 text-xs"
                   onClick={() => {
                     const current = parseInt(formData.green_fee) || 0
-                    setFormData({ ...formData, green_fee: (current + 15000).toString() })
+                    setFormData({
+                      ...formData,
+                      green_fee: (current + 15000).toString(),
+                    })
                   }}
                 >
                   15,000
@@ -373,7 +435,10 @@ export default function TeeTimeForm({
                   className="flex-1 text-xs"
                   onClick={() => {
                     const current = parseInt(formData.green_fee) || 0
-                    setFormData({ ...formData, green_fee: (current + 20000).toString() })
+                    setFormData({
+                      ...formData,
+                      green_fee: (current + 20000).toString(),
+                    })
                   }}
                 >
                   20,000
@@ -401,7 +466,10 @@ export default function TeeTimeForm({
                   className="flex-1 text-xs"
                   onClick={() => {
                     const current = parseInt(formData.onsite_payment) || 0
-                    setFormData({ ...formData, onsite_payment: (current + 92500).toString() })
+                    setFormData({
+                      ...formData,
+                      onsite_payment: (current + 92500).toString(),
+                    })
                   }}
                 >
                   92,500
@@ -413,7 +481,10 @@ export default function TeeTimeForm({
                   className="flex-1 text-xs"
                   onClick={() => {
                     const current = parseInt(formData.onsite_payment) || 0
-                    setFormData({ ...formData, onsite_payment: (current + 102500).toString() })
+                    setFormData({
+                      ...formData,
+                      onsite_payment: (current + 102500).toString(),
+                    })
                   }}
                 >
                   102,500

@@ -307,6 +307,8 @@ export default function TeeTimesPage() {
             open={isBookingsModalOpen}
             onClose={handleBookingsModalClose}
             teeTime={selectedTeeTime}
+            onEditTeeTime={handleEdit}
+            onDeleteTeeTime={handleDelete}
           />
         </div>
         </div>

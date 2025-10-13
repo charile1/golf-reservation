@@ -46,6 +46,7 @@ export default function TransactionsPage() {
             name
           )
         `)
+        .neq('status', 'canceled')  // 취소된 거래내역 제외
         .order('play_date', { ascending: false })
         .order('created_at', { ascending: false })
 
@@ -103,8 +104,8 @@ export default function TransactionsPage() {
       })
     : []
 
-  // 매출 통계 계산 - 선입금 중심
-  const stats = filteredTransactions.reduce(
+  // 매출 통계 계산 - 취소되지 않은 전체 거래내역 기준
+  const stats = (transactions || []).reduce(
     (acc, t) => {
       if (t.status !== 'canceled') {
         acc.totalPrepayment += t.prepayment  // 실제 받은 선입금

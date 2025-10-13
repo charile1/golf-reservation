@@ -18,7 +18,7 @@ const statusColors = {
 
 const statusLabels = {
   PENDING: "입금대기",
-  CONFIRMED: "마감",
+  CONFIRMED: "입금 확정",
   CANCELED: "취소",
 }
 
@@ -98,8 +98,7 @@ export default function BookingList({
                       <div className="text-sm font-medium text-gray-900">
                         {booking.tee_time.course_name}
                       </div>
-                      <div className="text-sm text-gray-500">
-                        {formatDate(booking.tee_time.date)}{" "}
+                      <div className="text-sm text-gray-800">
                         {booking.tee_time.time}
                       </div>
                     </td>
@@ -188,13 +187,22 @@ export default function BookingList({
               <div key={booking.id} className="p-4 hover:bg-gray-50">
                 <div className="space-y-3">
                   {/* 티타임 정보 */}
-                  <div>
-                    <div className="font-medium text-gray-900">
-                      {booking.tee_time.course_name}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium text-gray-900">
+                        {booking.tee_time.course_name}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {booking.tee_time.time}
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-500">
-                      {booking.tee_time.time}
-                    </div>
+                    <span
+                      className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                        statusColors[booking.status]
+                      }`}
+                    >
+                      {statusLabels[booking.status]}
+                    </span>
                   </div>
 
                   {/* 예약자 정보 */}
@@ -226,22 +234,6 @@ export default function BookingList({
                   <div className="text-sm">
                     <span className="text-gray-500">연락처:</span>
                     <div className="font-medium">{booking.phone}</div>
-                  </div>
-
-                  {/* 상태 */}
-                  <div className="flex items-center justify-between">
-                    <span
-                      className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                        statusColors[booking.status]
-                      }`}
-                    >
-                      {statusLabels[booking.status]}
-                    </span>
-                    {booking.paid_at && (
-                      <div className="text-xs text-gray-500">
-                        {formatDateTime(booking.paid_at)}
-                      </div>
-                    )}
                   </div>
 
                   {/* 선입금 금액 */}

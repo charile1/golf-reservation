@@ -39,11 +39,11 @@ export default function CustomersPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('customer')
-        .select('*')
+        .select('*, spouse:spouse_id(id, name, phone)')
         .order('created_at', { ascending: false })
 
       if (error) throw error
-      return data as Customer[]
+      return data as (Customer & { spouse?: { id: string; name: string; phone: string } | null })[]
     },
   })
 
@@ -96,14 +96,14 @@ export default function CustomersPage() {
               <h1 className="text-3xl font-bold text-gray-900">고객 관리</h1>
               <p className="text-gray-600 mt-1">고객 정보를 등록하고 관리하세요</p>
             </div>
-            <div className="flex gap-2 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               {/* 그룹 필터 */}
-              <div className="flex border rounded-md overflow-hidden flex-1 sm:flex-none">
+              <div className="flex border rounded-md overflow-hidden">
                 <Button
                   onClick={() => setGroupFilter('ALL')}
                   variant={groupFilter === 'ALL' ? 'default' : 'ghost'}
                   size="sm"
-                  className="rounded-none text-xs sm:text-sm"
+                  className="rounded-none text-xs sm:text-sm flex-1 sm:flex-none"
                 >
                   전체
                 </Button>
@@ -111,7 +111,7 @@ export default function CustomersPage() {
                   onClick={() => setGroupFilter('COUPLE')}
                   variant={groupFilter === 'COUPLE' ? 'default' : 'ghost'}
                   size="sm"
-                  className="rounded-none text-xs sm:text-sm"
+                  className="rounded-none text-xs sm:text-sm flex-1 sm:flex-none"
                 >
                   부부
                 </Button>
@@ -119,7 +119,7 @@ export default function CustomersPage() {
                   onClick={() => setGroupFilter('SINGLE')}
                   variant={groupFilter === 'SINGLE' ? 'default' : 'ghost'}
                   size="sm"
-                  className="rounded-none text-xs sm:text-sm"
+                  className="rounded-none text-xs sm:text-sm flex-1 sm:flex-none"
                 >
                   1인 조인
                 </Button>
@@ -127,23 +127,26 @@ export default function CustomersPage() {
                   onClick={() => setGroupFilter('NONE')}
                   variant={groupFilter === 'NONE' ? 'default' : 'ghost'}
                   size="sm"
-                  className="rounded-none text-xs sm:text-sm"
+                  className="rounded-none text-xs sm:text-sm flex-1 sm:flex-none"
                 >
                   미지정
                 </Button>
               </div>
-              <Button
-                onClick={() => setIsSmsModalOpen(true)}
-                variant="outline"
-                disabled={groupFilter === 'ALL'}
-              >
-                <MessageSquare className="h-4 w-4 mr-2" />
-                단체 문자
-              </Button>
-              <Button onClick={() => setIsFormOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                고객 등록
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setIsSmsModalOpen(true)}
+                  variant="outline"
+                  disabled={groupFilter === 'ALL'}
+                  className="flex-1 sm:flex-none"
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  단체 문자
+                </Button>
+                <Button onClick={() => setIsFormOpen(true)} className="flex-1 sm:flex-none">
+                  <Plus className="h-4 w-4 mr-2" />
+                  고객 등록
+                </Button>
+              </div>
             </div>
           </div>
 

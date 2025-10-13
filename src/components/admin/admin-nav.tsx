@@ -4,7 +4,15 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
-import { ClipboardList, Clock, LogOut, Users, Menu, X, DollarSign } from "lucide-react"
+import {
+  ClipboardList,
+  Clock,
+  LogOut,
+  Users,
+  Menu,
+  X,
+  DollarSign,
+} from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { useState, useEffect } from "react"
 
@@ -136,9 +144,7 @@ export default function AdminNav() {
           {/* 사용자 정보 */}
           {userName && (
             <div className="px-6 py-4 border-b">
-              <div className="text-sm text-gray-600">
-                {userName}님
-              </div>
+              <div className="text-sm text-gray-600">{userName}님</div>
             </div>
           )}
 

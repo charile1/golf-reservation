@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
 import {
   Dialog,
@@ -38,7 +38,22 @@ export default function CustomerForm({ open, onClose, customer }: CustomerFormPr
     phone: '',
     email: '',
     group_type: 'NONE' as CustomerGroupType,
+    spouse_id: '',
     memo: '',
+  })
+
+  // 배우자 선택을 위한 고객 목록 조회
+  const { data: customers } = useQuery({
+    queryKey: ['customers'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('customer')
+        .select('*')
+        .order('name')
+      if (error) throw error
+      return data as Customer[]
+    },
+    enabled: open,
   })
 
   useEffect(() => {
@@ -48,6 +63,7 @@ export default function CustomerForm({ open, onClose, customer }: CustomerFormPr
         phone: customer.phone,
         email: customer.email || '',
         group_type: customer.group_type,
+        spouse_id: (customer as any).spouse_id || '',
         memo: customer.memo || '',
       })
     } else {
@@ -56,6 +72,7 @@ export default function CustomerForm({ open, onClose, customer }: CustomerFormPr
         phone: '',
         email: '',
         group_type: 'NONE',
+        spouse_id: '',
         memo: '',
       })
     }
@@ -68,6 +85,7 @@ export default function CustomerForm({ open, onClose, customer }: CustomerFormPr
         phone: data.phone,
         email: data.email || null,
         group_type: data.group_type,
+        spouse_id: data.spouse_id || null,
         memo: data.memo || null,
       }
 
@@ -82,8 +100,9 @@ export default function CustomerForm({ open, onClose, customer }: CustomerFormPr
         if (error) throw error
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['customers'] })
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['customers'] })
+      await queryClient.refetchQueries({ queryKey: ['customers'] })
       toast({
         title: customer ? '수정 완료' : '등록 완료',
         description: customer
@@ -142,7 +161,7 @@ export default function CustomerForm({ open, onClose, customer }: CustomerFormPr
             <Select
               value={formData.group_type}
               onValueChange={(value: CustomerGroupType) =>
-                setFormData({ ...formData, group_type: value })
+                setFormData({ ...formData, group_type: value, spouse_id: value === 'COUPLE' ? formData.spouse_id : '' })
               }
             >
               <SelectTrigger className="mt-1">
@@ -158,6 +177,35 @@ export default function CustomerForm({ open, onClose, customer }: CustomerFormPr
               알림 발송 시 그룹별로 필터링할 수 있습니다
             </p>
           </div>
+
+          {formData.group_type === 'COUPLE' && (
+            <div>
+              <Label htmlFor="spouse_id">배우자</Label>
+              <Select
+                value={formData.spouse_id || 'none'}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, spouse_id: value === 'none' ? '' : value })
+                }
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="배우자 선택" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">선택 안함</SelectItem>
+                  {customers
+                    ?.filter(c => c.id !== customer?.id)
+                    .map(c => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name} ({c.phone})
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-gray-500 mt-1">
+                부부 고객의 경우 배우자를 연결할 수 있습니다
+              </p>
+            </div>
+          )}
 
           <div>
             <Label htmlFor="memo">메모</Label>

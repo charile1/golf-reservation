@@ -166,6 +166,12 @@ export default function BookingsPage() {
     setEditingBooking(null)
   }
 
+  // 입금 확정된 예약의 통계
+  const confirmedStats = {
+    count: bookings?.filter(b => b.status === 'CONFIRMED').length || 0,
+    total: bookings?.filter(b => b.status === 'CONFIRMED').reduce((sum, b) => sum + (b.payment_amount || 0), 0) || 0,
+  }
+
   return (
     <>
       <AdminNav />
@@ -176,6 +182,14 @@ export default function BookingsPage() {
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">예약 관리</h1>
               <p className="text-sm sm:text-base text-gray-600 mt-1">고객 예약을 관리하고 입금을 확인하세요</p>
+              <div className="mt-2 flex gap-3 text-sm">
+                <span className="text-blue-600 font-semibold">
+                  입금 확정: {confirmedStats.count}건
+                </span>
+                <span className="text-blue-600 font-semibold">
+                  선입금 총액: {confirmedStats.total.toLocaleString()}원
+                </span>
+              </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               {/* 월별 선택 */}

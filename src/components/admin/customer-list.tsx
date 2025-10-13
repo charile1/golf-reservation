@@ -1,10 +1,10 @@
-import { Edit, Trash2 } from 'lucide-react'
+import { Edit, Trash2, Heart } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { formatDateTime } from '@/lib/utils'
 import type { Customer } from '@/types/database'
 
 interface CustomerListProps {
-  customers: Customer[]
+  customers: (Customer & { spouse?: { id: string; name: string; phone: string } | null })[]
   onEdit: (customer: Customer) => void
   onDelete: (id: string) => void
 }
@@ -39,6 +39,9 @@ export default function CustomerList({
                 그룹
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                배우자
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 메모
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -53,8 +56,16 @@ export default function CustomerList({
             {customers.map((customer) => (
               <tr key={customer.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">
-                    {customer.name}
+                  <div className="flex items-center gap-2">
+                    <div className="text-sm font-medium text-gray-900">
+                      {customer.name}
+                    </div>
+                    {customer.spouse && (
+                      <div className="flex items-center gap-1 text-xs text-pink-600">
+                        <Heart className="h-3 w-3 fill-pink-600" />
+                        <span>{customer.spouse.name}</span>
+                      </div>
+                    )}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -76,6 +87,11 @@ export default function CustomerList({
                       ? '1인 조인'
                       : '미지정'}
                   </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-500">
+                    {customer.spouse ? customer.spouse.phone : '-'}
+                  </div>
                 </td>
                 <td className="px-6 py-4">
                   <div className="text-sm text-gray-500 max-w-xs truncate">
@@ -116,8 +132,16 @@ export default function CustomerList({
             <div className="space-y-3">
               {/* 고객명 */}
               <div>
-                <div className="font-medium text-gray-900 text-lg">
-                  {customer.name}
+                <div className="flex items-center gap-2">
+                  <div className="font-medium text-gray-900 text-lg">
+                    {customer.name}
+                  </div>
+                  {customer.spouse && (
+                    <div className="flex items-center gap-1 text-sm text-pink-600">
+                      <Heart className="h-4 w-4 fill-pink-600" />
+                      <span>{customer.spouse.name}</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -146,6 +170,14 @@ export default function CustomerList({
                     : '미지정'}
                 </span>
               </div>
+
+              {/* 배우자 연락처 */}
+              {customer.spouse && (
+                <div className="text-sm">
+                  <span className="text-gray-500">배우자 연락처:</span>
+                  <div className="font-medium">{customer.spouse.phone}</div>
+                </div>
+              )}
 
               {/* 메모 */}
               {customer.memo && (
