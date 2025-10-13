@@ -20,20 +20,25 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
-import { Trash2, Plus, CheckCircle } from "lucide-react"
+import { Trash2, Plus, CheckCircle, Edit, Trash } from "lucide-react"
 import type { TeeTime, Booking, Customer } from "@/types/database"
 import { formatCurrency } from "@/lib/utils"
+import { createTransaction, transactionExists } from "@/lib/transaction"
 
 interface TeeTimeBookingsModalProps {
   open: boolean
   onClose: () => void
   teeTime: TeeTime | null
+  onEditTeeTime?: (teeTime: TeeTime) => void
+  onDeleteTeeTime?: (id: string) => void
 }
 
 export default function TeeTimeBookingsModal({
   open,
   onClose,
   teeTime,
+  onEditTeeTime,
+  onDeleteTeeTime,
 }: TeeTimeBookingsModalProps) {
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -257,6 +262,7 @@ export default function TeeTimeBookingsModal({
   // Confirm payment mutation
   const confirmPaymentMutation = useMutation({
     mutationFn: async (bookingId: string) => {
+      // 1. 예약 상태 업데이트
       const { error } = await supabase
         .from("booking")
         .update({
@@ -265,6 +271,14 @@ export default function TeeTimeBookingsModal({
         })
         .eq("id", bookingId)
       if (error) throw error
+
+      // 2. transaction 존재 여부 확인
+      const exists = await transactionExists(supabase, bookingId)
+
+      // 3. transaction이 없으면 생성
+      if (!exists) {
+        await createTransaction(supabase, bookingId)
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -272,6 +286,7 @@ export default function TeeTimeBookingsModal({
       })
       queryClient.invalidateQueries({ queryKey: ["bookings"] })
       queryClient.invalidateQueries({ queryKey: ["teeTimes"] })
+      queryClient.invalidateQueries({ queryKey: ["transactions"] })
       toast({
         title: "입금 확인 완료",
         description: "예약이 확정되었습니다.",
@@ -303,14 +318,46 @@ export default function TeeTimeBookingsModal({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{teeTime.course_name}</DialogTitle>
-          <div className="text-m text-gray-800 mt-1 space-y-1">
-            {(teeTime as any).booker_name && (
-              <p>예약자명: {(teeTime as any).booker_name}</p>
-            )}
-            <div className="text-sm text-gray-500 mt-1 space-y-1">
-              선입금: {formatCurrency(teeTime.green_fee)} | 예약현황:{" "}
-              {teeTime.slots_booked}/{teeTime.slots_total}명
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <DialogTitle>{teeTime.course_name}</DialogTitle>
+              <div className="text-m text-gray-800 mt-1 space-y-1">
+                {(teeTime as any).booker_name && (
+                  <p>예약자명: {(teeTime as any).booker_name}</p>
+                )}
+                <div className="text-sm text-gray-500 mt-1 space-y-1">
+                  선입금: {formatCurrency(teeTime.green_fee)} | 예약현황:{" "}
+                  {teeTime.slots_booked}/{teeTime.slots_total}명
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              {onEditTeeTime && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    onEditTeeTime(teeTime)
+                    onClose()
+                  }}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+              )}
+              {onDeleteTeeTime && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    if (confirm("티타임을 삭제하시겠습니까?\n연결된 예약도 모두 삭제됩니다.")) {
+                      onDeleteTeeTime(teeTime.id)
+                      onClose()
+                    }
+                  }}
+                >
+                  <Trash className="h-4 w-4 text-red-500" />
+                </Button>
+              )}
             </div>
           </div>
         </DialogHeader>

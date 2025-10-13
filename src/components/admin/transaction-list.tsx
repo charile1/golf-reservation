@@ -1,6 +1,6 @@
-'use client'
+"use client"
 
-import { Button } from '@/components/ui/button'
+import { Button } from "@/components/ui/button"
 import {
   Table,
   TableBody,
@@ -8,32 +8,35 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from "@/components/ui/table"
 
 interface TransactionListProps {
   transactions: any[]
   onEdit: (transaction: any) => void
 }
 
-export default function TransactionList({ transactions, onEdit }: TransactionListProps) {
+export default function TransactionList({
+  transactions,
+  onEdit,
+}: TransactionListProps) {
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+    return new Date(dateString).toLocaleDateString("ko-KR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     })
   }
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'pending':
-        return '대기'
-      case 'confirmed':
-        return '마감'
-      case 'canceled':
-        return '취소'
-      case 'settled':
-        return '정산완료'
+      case "pending":
+        return "대기"
+      case "confirmed":
+        return "마감"
+      case "canceled":
+        return "취소"
+      case "settled":
+        return "정산완료"
       default:
         return status
     }
@@ -41,19 +44,18 @@ export default function TransactionList({ transactions, onEdit }: TransactionLis
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending':
-        return 'text-yellow-600 bg-yellow-50'
-      case 'confirmed':
-        return 'text-blue-600 bg-blue-50'
-      case 'canceled':
-        return 'text-red-600 bg-red-50'
-      case 'settled':
-        return 'text-green-600 bg-green-50'
+      case "pending":
+        return "text-yellow-600 bg-yellow-50"
+      case "confirmed":
+        return "text-blue-600 bg-blue-50"
+      case "canceled":
+        return "text-red-600 bg-red-50"
+      case "settled":
+        return "text-green-600 bg-green-50"
       default:
-        return 'text-gray-600 bg-gray-50'
+        return "text-gray-600 bg-gray-50"
     }
   }
-
 
   if (transactions.length === 0) {
     return (
@@ -69,12 +71,18 @@ export default function TransactionList({ transactions, onEdit }: TransactionLis
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="whitespace-nowrap">플레이 일시</TableHead>
+              <TableHead className="whitespace-nowrap">티타임 날짜</TableHead>
               <TableHead className="whitespace-nowrap">골프장</TableHead>
-              <TableHead className="whitespace-nowrap">예약자</TableHead>
-              <TableHead className="whitespace-nowrap text-right">인원</TableHead>
-              <TableHead className="whitespace-nowrap text-right">선입금</TableHead>
-              <TableHead className="whitespace-nowrap text-right">현장결제</TableHead>
+              <TableHead className="whitespace-nowrap">예약자명</TableHead>
+              <TableHead className="whitespace-nowrap text-right">
+                인원
+              </TableHead>
+              <TableHead className="whitespace-nowrap text-right">
+                선입금
+              </TableHead>
+              <TableHead className="whitespace-nowrap text-right">
+                현장결제
+              </TableHead>
               <TableHead className="whitespace-nowrap">상태</TableHead>
               <TableHead className="whitespace-nowrap">관리</TableHead>
             </TableRow>
@@ -85,14 +93,16 @@ export default function TransactionList({ transactions, onEdit }: TransactionLis
                 <TableCell className="whitespace-nowrap">
                   <div>{formatDate(transaction.play_date)}</div>
                   {transaction.tee_time?.time && (
-                    <div className="text-xs text-gray-500">{transaction.tee_time.time}</div>
+                    <div className="text-s text-gray-800">
+                      {transaction.tee_time.time}
+                    </div>
                   )}
                 </TableCell>
                 <TableCell className="whitespace-nowrap">
                   {transaction.course_name}
                 </TableCell>
                 <TableCell className="whitespace-nowrap">
-                  {transaction.booking?.name || '-'}
+                  {transaction.booking?.name || "-"}
                 </TableCell>
                 <TableCell className="text-right whitespace-nowrap">
                   {transaction.people_count}명

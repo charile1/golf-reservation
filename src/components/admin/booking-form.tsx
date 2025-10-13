@@ -22,6 +22,7 @@ import {
 import { Plus } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import type { BookingWithTeeTime, TeeTime, Customer } from "@/types/database"
+import { createTransaction, transactionExists, cancelTransaction } from "@/lib/transaction"
 
 interface BookingFormProps {
   open: boolean
@@ -188,18 +189,46 @@ export default function BookingForm({
           .eq("id", booking.id)
         if (error) throw error
 
-        // transaction도 함께 업데이트 (선입금 금액 동기화)
-        const { error: txError } = await supabase
-          .from("transaction")
-          .update({
-            prepayment: parseInt(data.payment_amount) || 0,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("booking_id", booking.id)
+        // 상태 변경에 따른 transaction 처리
+        const exists = await transactionExists(supabase, booking.id)
 
-        // transaction이 없어도 에러로 처리하지 않음 (아직 생성 전일 수 있음)
-        if (txError) {
-          console.warn("Transaction update failed:", txError)
+        if (data.status === "CONFIRMED") {
+          if (!exists) {
+            // CONFIRMED로 변경 & transaction 없음 -> 생성
+            await createTransaction(supabase, booking.id)
+          } else {
+            // CONFIRMED & transaction 있음
+            // 취소 상태면 다시 활성화, 아니면 금액만 동기화
+            const { data: txData } = await supabase
+              .from("transaction")
+              .select("status")
+              .eq("booking_id", booking.id)
+              .single()
+
+            if (txData?.status === "canceled") {
+              // 취소된 거래내역을 다시 활성화
+              await supabase
+                .from("transaction")
+                .update({
+                  status: "confirmed",
+                  prepayment: parseInt(data.payment_amount) || 0,
+                  updated_at: new Date().toISOString(),
+                })
+                .eq("booking_id", booking.id)
+            } else {
+              // 선입금 금액만 동기화
+              await supabase
+                .from("transaction")
+                .update({
+                  prepayment: parseInt(data.payment_amount) || 0,
+                  updated_at: new Date().toISOString(),
+                })
+                .eq("booking_id", booking.id)
+            }
+          }
+        } else if ((data.status === "PENDING" || data.status === "CANCELED") && exists) {
+          // PENDING 또는 CANCELED로 변경 & transaction 있음 -> 취소
+          await cancelTransaction(supabase, booking.id)
         }
       } else {
         const { error } = await supabase.from("booking").insert([payload])
